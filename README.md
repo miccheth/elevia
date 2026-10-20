@@ -1,74 +1,126 @@
-# Elevia
-
-Elevia è un progetto per organizzare e collegare documenti, note e altre risorse attraverso Tag e relazioni semantiche. Aggiunge uno strato logico ai contenuti esistenti senza spostare o modificare i file originali. Ogni risorsa può appartenere a più contesti ed essere ritrovata indipendentemente da dove si trova.
-
 ## Il problema moderno
 
 Gli esseri umani hanno una conoscenza generale del mondo, costruita attraverso esperienze e apprendimento. Il cervello può apprendere e ragionare su problemi molto diversi, ma affrontare un problema preciso richiede informazioni specifiche che non sempre possediamo o riusciamo a richiamare. Anche quando sono disponibili, non possiamo tenerle tutte presenti nello stesso momento: la memoria di lavoro gestisce pochi elementi alla volta, e seguire i dettagli senza perdere la visione d'insieme diventa più difficile con l'aumentare delle informazioni da confrontare.
 
-Nel 2026, il collo di bottiglia è riuscire ad utilizzare questa immensità di informazioni, che possono servire per un problema che vogliamo affrontare.
+Nel 2026, il collo di bottiglia è riuscire a usare le informazioni disponibili per affrontare un problema concreto. Chi studia una possibile cura per il diabete, per esempio, deve confrontare risultati, riconoscere contraddizioni e passare dalla domanda generale ai dettagli dei singoli studi. La conoscenza prodotta sull'argomento supera ciò che una persona può tenere contemporaneamente a mente, e ricostruire ogni volta il contesto rende il lavoro più difficile.
 
-Il flusso continuo di informazioni rende questo lavoro ancora più difficile. Un'osservazione in un commento sui social e un risultato descritto in un articolo scientifico possono riguardare lo stesso problema, ma arrivano in contesti separati. Vorrei poterli confrontare senza perdere la provenienza, le prove disponibili e il diverso grado di attendibilità. Mettere in relazione le fonti non significa attribuire a tutte lo stesso valore.
-
-## Perché serve un nuovo Framework
-
-Vorrei costruire Elevia come un framework per lavorare sulle informazioni, non soltanto per conservarle o cercarle. L’idea è una lavagna concettuale similmente allo spazio di pensiero astratto umano: uno spazio in cui leggere, confrontare fonti, collegare concetti e sviluppare ipotesi. Il sistema dovrebbe seguire il ragionamento della persona e rendere accessibili le informazioni pertinenti a ciò su cui sta ponendo attenzione.
-
-Immaginiamo di raccogliere in questo spazio la letteratura disponibile sul diabete. Chi studia una possibile cura dovrebbe poter confrontare risultati, riconoscere contraddizioni e passare da una domanda generale ai dettagli di uno studio, senza dover ricostruire ogni volta il contesto. Elevia dovrebbe aiutare in questo lavoro, mantenendo ogni affermazione collegata alle sue fonti. Valutare le prove e formulare ipotesi resterebbe compito della persona.
-
-L’obiettivo è rendere più facile usare la conoscenza disponibile come base per il proprio ragionamento. Raccogliere testi è solo il punto di partenza: il lavoro che Elevia dovrebbe sostenere è capire come si collegano e che cosa possiamo ricavarne.
+Il flusso continuo di informazioni rende questo lavoro ancora più difficile. Un'osservazione in un commento sui social e un risultato descritto in un articolo scientifico possono riguardare lo stesso problema, ma arrivano in contesti separati. Vorrei poterli confrontare senza perdere la provenienza, le prove disponibili e il diverso grado di attendibilità. Mettere in relazione le fonti non significa attribuire a tutte lo stesso valore. L'obiettivo è cercare un «centroide» il più possibile aderente alle prove disponibili: una sintesi ragionata che tenga conto dei contributi pertinenti, senza presumere che la verità coincida con la media delle opinioni.
 
 ## Principi
 
-1. **Amplificare, non sostituire:** la tecnologia si fa carico del lavoro mnemonico e meccanico per liberare risorse mentali, non per sollevare le persone dal compito di pensare. L'obiettivo è diventare più capaci, non disimparare a ragionare sviluppando dipendenza cognitiva. Uno strumento che pensa al posto tuo ha fallito, anche se il risultato è corretto.
+1. **Amplificare, non sostituire:** la tecnologia si fa carico del lavoro mnemonico e meccanico per liberare risorse mentali, non per sollevare le persone dal compito di pensare. L'obiettivo è diventare più capaci, non disimparare a ragionare sviluppando dipendenza cognitiva.
 
-2. **Organizzazione indipendente dai file:** Le risorse sono rappresentate come oggetti logici. Ogni oggetto deve avere almeno un Tag e può averne più di uno, senza richiedere copie o spostamenti del file originale.
+2. **Organizzazione indipendente dai file:** Le risorse sono rappresentate come oggetti logici. Ogni oggetto deve avere almeno un Tag e può averne più di uno.
 
 3. **Più descrizione, più visibilità:** Più un oggetto è ricco di descrittori, più è facile da ritrovare. La ricchezza informativa è l'antidoto al dimenticatoio.
 
-4. **Manutenzione assistita:** Il sistema deve aiutare a prevenire duplicati, unire Tag equivalenti e aggiornare o rimuovere quelli obsoleti, rendendo le operazioni comprensibili all'utente.
+4. **Human in the loop:** ogni conclusione dev'essere verificabile e ogni automatismo interrompibile. Il sistema propone, suggerisce, mette in evidenza; la decisione, l'intuizione e il giudizio critico appartengono alla persona.
 
-5. **Human in the loop:** ogni conclusione dev'essere verificabile e ogni automatismo interrompibile. Il sistema propone, suggerisce, mette in evidenza; la decisione, l'intuizione e il giudizio critico appartengono alla persona.
+5. **Aderenza ai processi mentali:** lo strumento è progettato per adattarsi al modo in cui pensa il cervello e a come gli esseri umani collegano le idee.
 
-6. **Architettura esplorabile:** i dati non vengono solo conservati, ma organizzati per essere navigati; le relazioni emergono anche dove l'utente non le stava cercando. Un archivio restituisce ciò che chiedi. Questo strumento deve mostrarti anche ciò che non sapevi di dover chiedere.
-
-7. **Aderenza ai processi mentali:** lo strumento è progettato per adattarsi al modo in cui pensa il cervello e collegano le idee gli essere umani.
-
-8. **Comprensione del significato:** Interpreta il senso reale delle informazioni, gestendo la complessità del linguaggio naturale senza appiattirla.
+6. **Comprensione del significato (sviluppo futuro):** interpretare il senso reale delle informazioni, gestendo la complessità del linguaggio naturale senza appiattirla.
 
 
-# Organizzazione dei contenuti
+# Fase Iniziale
 
-## Oggetti e Tag
+Lo sviluppo attuale riguarda il sistema di organizzazione logica delle risorse: oggetti, Tag e metadati. L’obiettivo è rendere le risorse facilmente ritrovabili attraverso ricerche deterministiche, basate su associazioni esplicite e criteri verificabili, senza spostare o modificare i file originali.
+
+La comprensione del linguaggio naturale e l’esplorazione semantica sono sviluppi futuri e non rientrano nel perimetro attuale.
+
+## Organizzazione dei contenuti
+
+| Componente        | Responsabilità                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------ |
+| Object            | Rappresenta una risorsa con identità indipendente.                                               |
+| Tag Registry      | Conserva identità e nomi dei Tag.                                                                |
+| Tag Tree          | Permette all'utente di organizzare i Tag come cartelle.                                          |
+| Metadati          | Descrivono proprietà strutturate degli oggetti, utilizzabili come criteri di ricerca.            |
+| Facet             | Espongono proprietà e valori come filtri per restringere i risultati.                            |
+| Smart Collections | Salvano criteri di ricerca e mostrano gli oggetti che li soddisfano, senza copiarli o spostarli. |
+### Object
 
 Ogni file, documento o risorsa è un `Object` astratto, non vincolato a una posizione fisica. A ogni oggetto si applicano uno o più `Tag`, permettendo di ritrovarlo da contesti diversi: una fattura può essere `Amministrazione`, `ClienteX` e `2025.Q1` contemporaneamente.
 
-## Gerarchia dei Tag
+#### Regole proposte
 
-**Livello 1 — Tag Registry.** Tutti i Tag esistenti nel sistema, con ID immutabile. Nessun Tag viene duplicato solo perché serve in un altro contesto.
+- Rinominare un oggetto non cambia la sua identità né le associazioni.
+- Aggiornare il riferimento a un file spostato conserva l'identità dell'oggetto. Non si presume che lo spostamento venga rilevato automaticamente.
+- Una risorsa non disponibile resta rappresentata dall'oggetto, con indisponibilità segnalata. L'oggetto resta ricercabile attraverso i dati registrati.
+- Rimuovere un oggetto da Elevia rimuove le sue associazioni, ma non elimina la risorsa originale.
+- La registrazione viene completata soltanto dopo l'assegnazione di almeno un Tag. Eventuali bozze di inserimento non sono oggetti già registrati.
 
-**Livello 2 — Tag Tree.** L'utente organizza i Tag in una gerarchia ad albero, crea rami, sposta e rinomina nodi. I nodi possono esistere anche prima di contenere documenti.
+### Tag Registry e Tag Tree
 
-## Descrittori
+#### Regole proposte
 
-- **Metadati:** proprietà strutturate nel formato `namespace:key:operator:value` (es. `photo:/year/eq/2025/`)
+- Rinominare o spostare un Tag non cambia le associazioni già registrate.
+- L'albero non ammette cicli: un Tag non può diventare discendente di sé stesso.
+- Il Tag a livello superiore eredita i contenuti presenti nei Sub Tag inferiori.
+- Il nome di un Tag è unico in tutto il sistema. Nomi che differiscono solo per maiuscole e minuscole sono considerati uguali.
+
+### Descrittori
+
+I **descrittori** sono le caratteristiche informative ricavate da una risorsa, come anno, autore, formato o importo. Quelli strutturati sono registrati come **metadati**. Non tutte le risorse hanno gli stessi descrittori.
+
+Le **facet** consentono di consultare queste proprietà attraverso filtri selezionabili. Ad esempio, `photo.year = 2025` rappresenta un metadato registrato, mentre selezionare `2025` nella facet dell’anno applica il filtro corrispondente. Metadati e facet non sono sinonimi: i primi descrivono le proprietà degli oggetti, le seconde permettono di filtrare i risultati in base a tali proprietà.
+
+- **Metadati:** proprietà strutturate associate agli oggetti, scritte come `namespace.chiave = valore`. Il namespace indica la categoria della proprietà: in `photo.year = 2025`, `photo` è la categoria, `year` la chiave e `2025` il valore. La notazione è uno pseudo-linguaggio descrittivo, non la sintassi definitiva.
+
+- **Facet:** filtri che consentono di selezionare valori specifici dei metadati per restringere i risultati (ad esempio, selezionare `2025` nella facet dell’anno per visualizzare le risorse corrispondenti).
+
+#### Regole proposte
+
+Ogni proprietà ha una chiave, un tipo e una cardinalità dichiarati. I tipi iniziali da valutare sono testo, numero, data e booleano. Una proprietà può ammettere uno o più valori secondo la sua definizione; valori incompatibili con il tipo vengono rifiutati.
+
+Una proprietà assente non equivale a una stringa vuota, a zero o a `false`. La ricerca deve poter verificare esplicitamente presenza e assenza.
+
+Proprietà e valore descrivono l'oggetto; l'operatore appartiene alla condizione di ricerca. Per esempio, l'oggetto registra `photo.year = 2025`, mentre la ricerca può chiedere `photo.year >= 2024`.
+
+#### Schema dei dati (da definire)
+
+Lo schema descriverà namespace, proprietà, tipi e cardinalità ammessi.
 
 ## Manutenzione
 
-La manutenzione è la parte più fondamentale di Elevia, assistita dal software. L'obiettivo è che l'utente abbia consapevolezza di ciò che sta avvenendo, senza dover gestire le operazioni deterministiche che la macchina può fare autonomamente.
+La manutenzione è una componente fondamentale di Elevia, supportata dal software. L’obiettivo è garantire che l’utente abbia consapevolezza delle operazioni in corso, lasciando al sistema la gestione automatica delle attività ripetitive e dei controlli di coerenza.
 
-1. **Prevenzione dei duplicati:** Il sistema evita di aggiungere Tag già presenti e ignora la rimozione di Tag inesistenti.
+### Funzionalità principali
 
-2. **Autocompletamento:** Suggerisce Tag già utilizzati o definiti nel vocabolario durante la digitazione.
+Autocompletamento: suggerisce durante la digitazione i Tag già utilizzati o presenti nel vocabolario controllato.
 
-3. **Visualizzazione dei Tag comuni:** Quando selezioni più file, mostra automaticamente i Tag condivisi da tutti i file selezionati.
+Visualizzazione dei Tag comuni: mostra i Tag condivisi da tutti gli oggetti selezionati, considerando le associazioni dirette.
 
-4. **Vocabolario controllato:** Consente di definire un vocabolario di Tag ammessi o suggeriti e di organizzare gruppi di Tag mutuamente esclusivi.
+Vocabolario controllato: consente di definire i Tag ammessi.
 
-5. **Pulizia dei Tag:** Evidenzia possibili refusi, varianti singolari/plurali e Tag inutilizzati o sospetti, suggerendo correzioni.
+Pulizia dei Tag: segnala possibili refusi, varianti singolari e plurali, Tag inutilizzati e altre anomalie, suggerendo eventuali correzioni.
+
+Tag obbligatori: la rimozione dell’ultimo Tag è impedita, salvo che venga assegnato un sostituto nella stessa operazione.
+
+Fusione: per fondere due Tag è necessario scegliere quale mantenere. Le associazioni vengono trasferite al Tag mantenuto, evitando duplicati. L'eventuale collocazione dei Tag figli deve essere risolta esplicitamente.
+
+Eliminazione: prima di eliminare un Tag è necessario risolverne le associazioni e la struttura gerarchica, compresi gli eventuali Tag figli. L'eliminazione di un Tag non comporta la cancellazione degli oggetti o dei file originali.
+
+Modifiche atomiche: se un’operazione viola i vincoli definiti, viene rifiutata integralmente, senza lasciare modifiche parziali.
+
+## Ricerca deterministica
+
+Un oggetto compare una sola volta nei risultati, anche se soddisfa più rami della query. Una condizione non valida produce un errore comprensibile, non viene ignorata.
+
+La sintassi è in definizione. Gli esempi seguenti indicano le condizioni previste, non la forma finale.
+
+| Condizione                | Esempio                    |
+| ------------------------- | -------------------------- |
+| **Tag**                   | `tag:Medicina`             |
+| **Uguaglianza**           | `document.year = 2025`     |
+| **Confronto**             | `finance.amount >= 1000`   |
+| **Proprietà presente**    | `document.author presente` |
+| **Proprietà assente**     | `document.author assente`  |
+| **Tutte le condizioni**   | `A AND B`                  |
+| **Almeno una condizione** | `A OR B`                   |
+| **Esclusione**            | `NOT A`                    |
 
 
----
+____
 ***Lingua progetto attuale:** it_IT*
 
 ***Nota:** il nome **Elevia** è provvisorio e verrà sostituito, poiché già utilizzato altrove.*
