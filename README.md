@@ -1,3 +1,5 @@
+# Elevia
+
 ## Il problema moderno
 
 Gli esseri umani hanno una conoscenza generale del mondo, costruita attraverso esperienze e apprendimento. Il cervello può apprendere e ragionare su problemi molto diversi, ma affrontare un problema preciso richiede informazioni specifiche che non sempre possediamo o riusciamo a richiamare. Anche quando sono disponibili, non possiamo tenerle tutte presenti nello stesso momento: la memoria di lavoro gestisce pochi elementi alla volta, e seguire i dettagli senza perdere la visione d'insieme diventa più difficile con l'aumentare delle informazioni da confrontare.
@@ -10,9 +12,9 @@ Il flusso continuo di informazioni rende questo lavoro ancora più difficile. Un
 
 1. **Amplificare, non sostituire:** la tecnologia si fa carico del lavoro mnemonico e meccanico per liberare risorse mentali, non per sollevare le persone dal compito di pensare. L'obiettivo è diventare più capaci, non disimparare a ragionare sviluppando dipendenza cognitiva.
 
-2. **Organizzazione indipendente dai file:** Le risorse sono rappresentate come oggetti logici. Ogni oggetto deve avere almeno un Tag e può averne più di uno.
+2. **Organizzazione indipendente dai file:** le risorse sono rappresentate come oggetti logici. Ogni oggetto deve avere almeno un Tag e può averne più di uno.
 
-3. **Più descrizione, più visibilità:** Più un oggetto è ricco di descrittori, più è facile da ritrovare. La ricchezza informativa è l'antidoto al dimenticatoio.
+3. **Più descrizione, più visibilità:** più un oggetto è ricco di descrittori, più è facile da ritrovare. La ricchezza informativa è l'antidoto al dimenticatoio.
 
 4. **Human in the loop:** ogni conclusione dev'essere verificabile e ogni automatismo interrompibile. Il sistema propone, suggerisce, mette in evidenza; la decisione, l'intuizione e il giudizio critico appartengono alla persona.
 
@@ -21,27 +23,28 @@ Il flusso continuo di informazioni rende questo lavoro ancora più difficile. Un
 6. **Comprensione del significato (sviluppo futuro):** interpretare il senso reale delle informazioni, gestendo la complessità del linguaggio naturale senza appiattirla.
 
 
-# Fase Iniziale
+## Fase Iniziale
 
-Lo sviluppo attuale riguarda il sistema di organizzazione logica delle risorse: oggetti, Tag e metadati. L’obiettivo è rendere le risorse facilmente ritrovabili attraverso ricerche deterministiche, basate su associazioni esplicite e criteri verificabili, senza spostare o modificare i file originali.
+Lo sviluppo attuale riguarda il sistema di organizzazione logica delle risorse: oggetti, Tag e metadati. L’obiettivo è rendere le risorse facilmente ritrovabili attraverso ricerche deterministiche, basate su criteri verificabili, senza spostare o modificare i file originali.
 
 La comprensione del linguaggio naturale e l’esplorazione semantica sono sviluppi futuri e non rientrano nel perimetro attuale.
 
-## Organizzazione dei contenuti
+### Organizzazione dei contenuti
 
 | Componente        | Responsabilità                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------------------------ |
 | Object            | Rappresenta una risorsa con identità indipendente.                                               |
 | Tag Registry      | Conserva identità e nomi dei Tag.                                                                |
-| Tag Tree          | Permette all'utente di organizzare i Tag come cartelle.                                          |
+| Tag Tree          | Mostra la gerarchia dei Tag: lo stesso Tag può comparire sotto più genitori.                     |
 | Metadati          | Descrivono proprietà strutturate degli oggetti, utilizzabili come criteri di ricerca.            |
 | Facet             | Espongono proprietà e valori come filtri per restringere i risultati.                            |
 | Smart Collections | Salvano criteri di ricerca e mostrano gli oggetti che li soddisfano, senza copiarli o spostarli. |
-### Object
+
+#### Object
 
 Ogni file, documento o risorsa è un `Object` astratto, non vincolato a una posizione fisica. A ogni oggetto si applicano uno o più `Tag`, permettendo di ritrovarlo da contesti diversi: una fattura può essere `Amministrazione`, `ClienteX` e `2025.Q1` contemporaneamente.
 
-#### Regole proposte
+##### Regole proposte
 
 - Rinominare un oggetto non cambia la sua identità né le associazioni.
 - Aggiornare il riferimento a un file spostato conserva l'identità dell'oggetto. Non si presume che lo spostamento venga rilevato automaticamente.
@@ -49,16 +52,17 @@ Ogni file, documento o risorsa è un `Object` astratto, non vincolato a una posi
 - Rimuovere un oggetto da Elevia rimuove le sue associazioni, ma non elimina la risorsa originale.
 - La registrazione viene completata soltanto dopo l'assegnazione di almeno un Tag. Eventuali bozze di inserimento non sono oggetti già registrati.
 
-### Tag Registry e Tag Tree
+#### Tag Registry e Tag Tree
 
-#### Regole proposte
+##### Regole proposte
 
-- Rinominare o spostare un Tag non cambia le associazioni già registrate.
-- L'albero non ammette cicli: un Tag non può diventare discendente di sé stesso.
+- Un Tag può avere più genitori, mantenendo un'unica identità e le stesse associazioni agli oggetti. La gerarchia è un grafo diretto aciclico, visualizzabile con rami simili a cartelle.
+- Rinominare un Tag o modificarne i genitori non cambia le associazioni già registrate agli oggetti. Rimuovere una relazione con un genitore non elimina il Tag né le altre relazioni.
+- La gerarchia non ammette cicli: un Tag non può diventare discendente di sé stesso.
 - Il Tag a livello superiore eredita i contenuti presenti nei Sub Tag inferiori.
 - Il nome di un Tag è unico in tutto il sistema. Nomi che differiscono solo per maiuscole e minuscole sono considerati uguali.
 
-### Descrittori
+#### Descrittori
 
 I **descrittori** sono le caratteristiche informative ricavate da una risorsa, come anno, autore, formato o importo. Quelli strutturati sono registrati come **metadati**. Non tutte le risorse hanno gli stessi descrittori.
 
@@ -68,7 +72,7 @@ Le **facet** consentono di consultare queste proprietà attraverso filtri selezi
 
 - **Facet:** filtri che consentono di selezionare valori specifici dei metadati per restringere i risultati (ad esempio, selezionare `2025` nella facet dell’anno per visualizzare le risorse corrispondenti).
 
-#### Regole proposte
+##### Regole proposte
 
 Ogni proprietà ha una chiave, un tipo e una cardinalità dichiarati. I tipi iniziali da valutare sono testo, numero, data e booleano. Una proprietà può ammettere uno o più valori secondo la sua definizione; valori incompatibili con il tipo vengono rifiutati.
 
@@ -76,33 +80,29 @@ Una proprietà assente non equivale a una stringa vuota, a zero o a `false`. La 
 
 Proprietà e valore descrivono l'oggetto; l'operatore appartiene alla condizione di ricerca. Per esempio, l'oggetto registra `photo.year = 2025`, mentre la ricerca può chiedere `photo.year >= 2024`.
 
-#### Schema dei dati (da definire)
-
 Lo schema descriverà namespace, proprietà, tipi e cardinalità ammessi.
 
-## Manutenzione
+### Manutenzione
 
 La manutenzione è una componente fondamentale di Elevia, supportata dal software. L’obiettivo è garantire che l’utente abbia consapevolezza delle operazioni in corso, lasciando al sistema la gestione automatica delle attività ripetitive e dei controlli di coerenza.
 
-### Funzionalità principali
+#### Funzionalità principali
 
-Autocompletamento: suggerisce durante la digitazione i Tag già utilizzati o presenti nel vocabolario controllato.
+1. **Autocompletamento**: suggerisce durante la digitazione i Tag già utilizzati o presenti nel vocabolario controllato.
 
-Visualizzazione dei Tag comuni: mostra i Tag condivisi da tutti gli oggetti selezionati, considerando le associazioni dirette.
+2. **Vocabolario controllato**: consente di definire i Tag ammessi.
 
-Vocabolario controllato: consente di definire i Tag ammessi.
+3. **Pulizia dei Tag**: segnala possibili refusi, varianti singolari e plurali, Tag inutilizzati e altre anomalie, suggerendo eventuali correzioni.
 
-Pulizia dei Tag: segnala possibili refusi, varianti singolari e plurali, Tag inutilizzati e altre anomalie, suggerendo eventuali correzioni.
+4. **Tag obbligatori**: la rimozione dell’ultimo Tag è impedita, salvo che venga assegnato un sostituto nella stessa operazione.
 
-Tag obbligatori: la rimozione dell’ultimo Tag è impedita, salvo che venga assegnato un sostituto nella stessa operazione.
+5. **Fusione**: per fondere due Tag è necessario scegliere quale mantenere. Le associazioni vengono trasferite al Tag mantenuto, evitando duplicati. L'eventuale collocazione dei Tag figli deve essere risolta esplicitamente.
 
-Fusione: per fondere due Tag è necessario scegliere quale mantenere. Le associazioni vengono trasferite al Tag mantenuto, evitando duplicati. L'eventuale collocazione dei Tag figli deve essere risolta esplicitamente.
+6. **Eliminazione**: prima di eliminare un Tag è necessario risolverne le associazioni e la struttura gerarchica, compresi gli eventuali Tag figli. L'eliminazione di un Tag non comporta la cancellazione degli oggetti o dei file originali.
 
-Eliminazione: prima di eliminare un Tag è necessario risolverne le associazioni e la struttura gerarchica, compresi gli eventuali Tag figli. L'eliminazione di un Tag non comporta la cancellazione degli oggetti o dei file originali.
+7. **Modifiche atomiche**: se un’operazione viola i vincoli definiti, viene rifiutata integralmente, senza lasciare modifiche parziali.
 
-Modifiche atomiche: se un’operazione viola i vincoli definiti, viene rifiutata integralmente, senza lasciare modifiche parziali.
-
-## Ricerca deterministica
+### Ricerca deterministica
 
 Un oggetto compare una sola volta nei risultati, anche se soddisfa più rami della query. Una condizione non valida produce un errore comprensibile, non viene ignorata.
 

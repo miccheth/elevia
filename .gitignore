@@ -284,3 +284,6 @@ __marimo__/
 
 # Private Notes
 _private/
+
+# Claude
+.claude/
