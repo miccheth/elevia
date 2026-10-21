@@ -12,7 +12,7 @@ Il flusso continuo di informazioni rende questo lavoro ancora più difficile. Un
 
 1. **Amplificare, non sostituire:** la tecnologia si fa carico del lavoro mnemonico e meccanico per liberare risorse mentali, non per sollevare le persone dal compito di pensare. L'obiettivo è diventare più capaci, non disimparare a ragionare sviluppando dipendenza cognitiva.
 
-2. **Organizzazione indipendente dai file:** le risorse sono rappresentate come oggetti logici. Ogni oggetto deve avere almeno un Tag e può averne più di uno.
+2. **Organizzazione indipendente dai file:** le risorse sono rappresentate come oggetti logici. Ogni oggetto deve avere almeno un’assegnazione a un placement di un Tag e può averne più di una, senza essere duplicato.
 
 3. **Più descrizione, più visibilità:** più un oggetto è ricco di descrittori, più è facile da ritrovare. La ricchezza informativa è l'antidoto al dimenticatoio.
 
@@ -27,22 +27,28 @@ Il flusso continuo di informazioni rende questo lavoro ancora più difficile. Un
 
 Lo sviluppo attuale riguarda il sistema di organizzazione logica delle risorse: oggetti, Tag e metadati. L’obiettivo è rendere le risorse facilmente ritrovabili attraverso ricerche deterministiche, basate su criteri verificabili, senza spostare o modificare i file originali.
 
+Un Tag identifica un concetto e mantiene un’unica identità. Un **placement** rappresenta una sua collocazione nella struttura. Un’**assegnazione** collega un oggetto a un placement, conservandone il contesto completo. Lo stesso oggetto può avere più assegnazioni senza essere duplicato.
+
+La [panoramica visiva della fase iniziale](docs/visual-summary.md) riassume questa fase.
+
 La comprensione del linguaggio naturale e l’esplorazione semantica sono sviluppi futuri e non rientrano nel perimetro attuale.
 
 ### Organizzazione dei contenuti
 
-| Componente        | Responsabilità                                                                                   |
-| ----------------- | ------------------------------------------------------------------------------------------------ |
-| Object            | Rappresenta una risorsa con identità indipendente.                                               |
-| Tag Registry      | Conserva identità e nomi dei Tag.                                                                |
-| Tag Tree          | Mostra la gerarchia dei Tag: lo stesso Tag può comparire sotto più genitori.                     |
-| Metadati          | Descrivono proprietà strutturate degli oggetti, utilizzabili come criteri di ricerca.            |
-| Facet             | Espongono proprietà e valori come filtri per restringere i risultati.                            |
-| Smart Collections | Salvano criteri di ricerca e mostrano gli oggetti che li soddisfano, senza copiarli o spostarli. |
+| Componente        | Responsabilità                                                                                       |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| Object            | Rappresenta una risorsa con identità indipendente.                                                     |
+| Tag Registry      | Conserva identità e nomi univoci dei Tag.                                                              |
+| Tag placements    | Rappresentano le collocazioni contestuali dei Tag, con identità stabili.                                |
+| Assegnazioni      | Collegano gli oggetti ai placement, conservando il contesto completo.                                  |
+| Tag Tree          | Visualizza la struttura delle collocazioni dei Tag.                                                   |
+| Metadati          | Descrivono proprietà strutturate degli oggetti, utilizzabili come criteri di ricerca.                  |
+| Facet             | Espongono filtri sui metadati, indipendenti dai Tag e dai contesti di assegnazione.                      |
+| Smart Collections | Salvano ambito e condizioni di ricerca e mostrano gli oggetti corrispondenti, senza copiarli o spostarli. |
 
 #### Object
 
-Ogni file, documento o risorsa è un `Object` astratto, non vincolato a una posizione fisica. A ogni oggetto si applicano uno o più `Tag`, permettendo di ritrovarlo da contesti diversi: una fattura può essere `Amministrazione`, `ClienteX` e `2025.Q1` contemporaneamente.
+Ogni file, documento o risorsa è un `Object` astratto, non vincolato a una posizione fisica. Le assegnazioni ai placement permettono di ritrovarlo da contesti diversi senza crearne copie. Un oggetto può essere assegnato a più placement dello stesso Tag o di Tag diversi.
 
 ##### Regole proposte
 
@@ -50,17 +56,54 @@ Ogni file, documento o risorsa è un `Object` astratto, non vincolato a una posi
 - Aggiornare il riferimento a un file spostato conserva l'identità dell'oggetto. Non si presume che lo spostamento venga rilevato automaticamente.
 - Una risorsa non disponibile resta rappresentata dall'oggetto, con indisponibilità segnalata. L'oggetto resta ricercabile attraverso i dati registrati.
 - Rimuovere un oggetto da Elevia rimuove le sue associazioni, ma non elimina la risorsa originale.
-- La registrazione viene completata soltanto dopo l'assegnazione di almeno un Tag. Eventuali bozze di inserimento non sono oggetti già registrati.
+- La registrazione viene completata soltanto dopo almeno un’assegnazione a un placement. Eventuali bozze di inserimento non sono oggetti già registrati.
 
-#### Tag Registry e Tag Tree
+#### Tag Registry, placement e Tag Tree
+
+Ferrari può essere un solo Tag con due placement: `Lavoro → Ferrari` e `Passioni → Ferrari`. I collegamenti ai figli e le assegnazioni restano propri di ciascuna collocazione: aggiungere Fotografie sotto Passioni → Ferrari non lo aggiunge anche sotto Lavoro → Ferrari.
+
+Il contesto completo distingue anche collocazioni con lo stesso padre immediato: `Lavoro → Ferrari → Contratti` e `Passioni → Ferrari → Contratti` usano lo stesso Tag Contratti, ma rappresentano contesti diversi. Le assegnazioni fanno riferimento all’identità stabile del placement, non soltanto a una stringa di nomi. I percorsi mostrati sono descrittivi, non la sintassi definitiva delle query.
 
 ##### Regole proposte
 
-- Un Tag può avere più genitori, mantenendo un'unica identità e le stesse associazioni agli oggetti. La gerarchia è un grafo diretto aciclico, visualizzabile con rami simili a cartelle.
-- Rinominare un Tag o modificarne i genitori non cambia le associazioni già registrate agli oggetti. Rimuovere una relazione con un genitore non elimina il Tag né le altre relazioni.
-- La gerarchia non ammette cicli: un Tag non può diventare discendente di sé stesso.
-- Il Tag a livello superiore eredita i contenuti presenti nei Sub Tag inferiori.
+- Un Tag può comparire in più placement, mantenendo un’unica identità. Riutilizzare un Tag non condivide automaticamente figli o assegnazioni tra contesti.
+- Tutti i nomi della struttura sono Tag. Padre e figlio sono ruoli nei collegamenti, non tipi diversi di Tag.
+- Ogni assegnazione fa riferimento a un placement. Un placement radice permette di usare un Tag senza genitore; non serve un’assegnazione globale priva di collocazione.
+- Rinominare un Tag conserva la sua identità e non interrompe le assegnazioni. Modificare la struttura può invece cambiare i contesti e i risultati delle ricerche: prima della conferma deve essere mostrato l’impatto. Le regole dettagliate degli spostamenti restano da definire.
+- La gerarchia non ammette cicli. Il vincolo richiede due controlli distinti:
+  - **Tra placement:** un placement è una collocazione contestuale di un Tag. Non può diventare discendente di sé stesso; per esempio, non si può spostare un ramo dentro un proprio discendente.
+  - **Tra identità dei Tag:** considerando insieme i collegamenti di tutti i contesti, un Tag non può diventare discendente di sé stesso, nemmeno attraverso placement diversi. Per esempio, `A → B` in un contesto e `B → A` in un altro sono vietati, anche se i placement non formano un ciclo. Lo stesso vale per percorsi più lunghi e per il collegamento diretto `A → A`.
+  - Ogni modifica della struttura deve rispettare entrambi i vincoli. Controllare soltanto i placement non basta; se uno dei controlli fallisce, l’operazione viene rifiutata integralmente.
+- La ricerca su un ramo include gli oggetti assegnati al placement selezionato e ai suoi discendenti, senza saltare ad altre collocazioni dei Tag incontrati. Gli antenati non diventano automaticamente Tag direttamente assegnati agli oggetti.
 - Il nome di un Tag è unico in tutto il sistema. Nomi che differiscono solo per maiuscole e minuscole sono considerati uguali.
+
+#### Assegnazioni e inserimento guidato
+
+Le operazioni sulle assegnazioni sono distinte dalle modifiche della struttura:
+
+| Operazione                   | Effetto                                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------------------- |
+| Aggiungi anche a…             | Aggiunge un’assegnazione al placement scelto, conservando quelle esistenti.                |
+| Trasferisci in…               | Sostituisce l’assegnazione di partenza con quella di destinazione, conservando le altre.   |
+| Rimuovi da questo contesto    | Rimuove soltanto l’assegnazione selezionata.                                              |
+
+Non sono ammesse assegnazioni duplicate dello stesso oggetto allo stesso placement. Aggiungere un’assegnazione già presente non ne crea un’altra. Le operazioni non duplicano l’oggetto né il file originale e non spostano il placement.
+
+Elevia propone i contesti basandosi sullo storico delle assegnazioni. Inserendo da un ramo, può predisporre quel contesto e mostrarlo prima della conferma. L’utente può accettare, modificare o rifiutare i suggerimenti e scegliere altre collocazioni disponibili. Vengono registrate soltanto le assegnazioni confermate.
+
+Lo storico non autorizza assegnazioni automatiche. Condividere un oggetto tra due contesti non li sincronizza: i documenti futuri ricevono soltanto le assegnazioni confermate per ciascuno di essi. Il metodo dei suggerimenti resta da definire e non richiede necessariamente AI; in assenza di storico, le collocazioni disponibili restano consultabili.
+
+#### Vocabolario controllato e schema dei metadati
+
+I Tag, i namespace e le proprietà dei metadati devono essere definiti prima di essere assegnati agli oggetti.
+
+Il vocabolario controllato stabilisce i Tag ammessi. Lo schema dei metadati stabilisce i namespace e, per ogni proprietà, la chiave, il tipo e la cardinalità. Per le proprietà con valori controllati, definisce anche l'elenco dei valori ammessi; per le altre, i valori devono rispettare il tipo dichiarato, senza essere elencati in anticipo.
+
+Per esempio, prima di registrare `work.status = approved`, devono esistere il namespace `work` e la proprietà `status`, con le relative regole. Se `status` prevede un elenco di valori ammessi, anche `approved` deve essere presente nell'elenco.
+
+Le definizioni possono essere aggiunte o modificate esplicitamente. Assegnare un dato a un oggetto non crea automaticamente nuovi Tag, namespace, proprietà o valori controllati. Un'assegnazione che non rispetta le definizioni viene rifiutata.
+
+I namespace dei metadati sono indipendenti dai Tag. Il namespace `work` non coincide con il Tag Lavoro: l’assegnazione a un placement non crea automaticamente metadati.
 
 #### Descrittori
 
@@ -72,15 +115,15 @@ Le **facet** consentono di consultare queste proprietà attraverso filtri selezi
 
 - **Facet:** filtri che consentono di selezionare valori specifici dei metadati per restringere i risultati (ad esempio, selezionare `2025` nella facet dell’anno per visualizzare le risorse corrispondenti).
 
+Le Facet sono indipendenti dai Tag e dai contesti di assegnazione. La stessa Facet può essere applicata a una ricerca globale o a un ramo specifico: il filtro sui metadati e l’ambito della ricerca sono criteri distinti e combinabili.
+
 ##### Regole proposte
 
-Ogni proprietà ha una chiave, un tipo e una cardinalità dichiarati. I tipi iniziali da valutare sono testo, numero, data e booleano. Una proprietà può ammettere uno o più valori secondo la sua definizione; valori incompatibili con il tipo vengono rifiutati.
+Ogni proprietà deve rispettare la definizione nello schema dei metadati. I tipi iniziali da valutare sono testo, numero, data e booleano. Una proprietà può ammettere uno o più valori secondo la cardinalità dichiarata.
 
 Una proprietà assente non equivale a una stringa vuota, a zero o a `false`. La ricerca deve poter verificare esplicitamente presenza e assenza.
 
 Proprietà e valore descrivono l'oggetto; l'operatore appartiene alla condizione di ricerca. Per esempio, l'oggetto registra `photo.year = 2025`, mentre la ricerca può chiedere `photo.year >= 2024`.
-
-Lo schema descriverà namespace, proprietà, tipi e cardinalità ammessi.
 
 ### Manutenzione
 
@@ -90,27 +133,38 @@ La manutenzione è una componente fondamentale di Elevia, supportata dal softwar
 
 1. **Autocompletamento**: suggerisce durante la digitazione i Tag già utilizzati o presenti nel vocabolario controllato.
 
-2. **Vocabolario controllato**: consente di definire i Tag ammessi.
+2. **Vocabolario controllato e schema dei metadati**: consentono di definire i Tag, i namespace e le proprietà ammesse, con tipi, cardinalità ed eventuali elenchi di valori controllati, prima del loro uso negli oggetti.
 
 3. **Pulizia dei Tag**: segnala possibili refusi, varianti singolari e plurali, Tag inutilizzati e altre anomalie, suggerendo eventuali correzioni.
 
-4. **Tag obbligatori**: la rimozione dell’ultimo Tag è impedita, salvo che venga assegnato un sostituto nella stessa operazione.
+   La manutenzione impedisce inoltre di rappresentare la stessa informazione sia come Tag sia come metadato. Per esempio, se il cliente è rappresentato dal Tag `Ferrari`, non viene registrato anche come `work.client = Ferrari`. Le regole per dichiarare e verificare queste equivalenze sono da definire; la sola coincidenza del testo non basta a stabilirle.
 
-5. **Fusione**: per fondere due Tag è necessario scegliere quale mantenere. Le associazioni vengono trasferite al Tag mantenuto, evitando duplicati. L'eventuale collocazione dei Tag figli deve essere risolta esplicitamente.
+4. **Assegnazioni obbligatorie**: la rimozione dell’ultima assegnazione di un oggetto è impedita, salvo sostituzione nella stessa operazione.
 
-6. **Eliminazione**: prima di eliminare un Tag è necessario risolverne le associazioni e la struttura gerarchica, compresi gli eventuali Tag figli. L'eliminazione di un Tag non comporta la cancellazione degli oggetti o dei file originali.
+5. **Eliminazione**: eliminare un placement non equivale a eliminare il Tag dal Registry. L’eliminazione di una collocazione con figli o assegnazioni è bloccata finché questi non vengono risolti esplicitamente. Prima di eliminare un Tag devono essere risolti tutti i suoi placement e i relativi collegamenti e assegnazioni. Nessuna delle due operazioni comporta la cancellazione degli oggetti o dei file originali.
 
-7. **Modifiche atomiche**: se un’operazione viola i vincoli definiti, viene rifiutata integralmente, senza lasciare modifiche parziali.
+6. **Modifiche atomiche**: se un’operazione viola i vincoli definiti, viene rifiutata integralmente, senza lasciare modifiche parziali.
 
 ### Ricerca deterministica
+
+La ricerca distingue due ambiti:
+
+| Modalità           | Ambito                                                                                                               |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Ovunque            | Tutte le collocazioni del Tag selezionato e i loro discendenti.                                                         |
+| Solo questo ramo   | Il placement selezionato e i suoi discendenti, senza saltare alle altre collocazioni dei Tag incontrati.                |
+
+Per esempio, Ferrari ovunque comprende gli oggetti dei contesti Lavoro e Passioni. La ricerca sul placement Lavoro → Ferrari rimane invece nel ramo lavorativo. La ricerca globale raccoglie le assegnazioni nelle diverse collocazioni, non è un tipo diverso di assegnazione.
 
 Un oggetto compare una sola volta nei risultati, anche se soddisfa più rami della query. Una condizione non valida produce un errore comprensibile, non viene ignorata.
 
 La sintassi è in definizione. Gli esempi seguenti indicano le condizioni previste, non la forma finale.
 
+L’utente combina l’ambito della ricerca con condizioni sui Tag e sui metadati.
+
 | Condizione                | Esempio                    |
 | ------------------------- | -------------------------- |
-| **Tag**                   | `tag:Medicina`             |
+| **Tag, ovunque**           | `tag:Medicina`             |
 | **Uguaglianza**           | `document.year = 2025`     |
 | **Confronto**             | `finance.amount >= 1000`   |
 | **Proprietà presente**    | `document.author presente` |
@@ -118,6 +172,12 @@ La sintassi è in definizione. Gli esempi seguenti indicano le condizioni previs
 | **Tutte le condizioni**   | `A AND B`                  |
 | **Almeno una condizione** | `A OR B`                   |
 | **Esclusione**            | `NOT A`                    |
+
+#### Smart Collections
+
+Le Smart Collections salvano ambito e condizioni della ricerca, non copie degli oggetti. Una raccolta Ferrari ovunque e una raccolta limitata a Passioni → Ferrari non hanno criteri equivalenti.
+
+I riferimenti usano identità stabili, non soltanto nomi visualizzati. Rinominare un Tag non interrompe il riferimento. Se un riferimento viene eliminato, la ricerca viene segnalata come non valida: il criterio non viene ignorato né sostituito silenziosamente.
 
 
 ____
