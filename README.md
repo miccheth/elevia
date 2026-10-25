@@ -1,10 +1,65 @@
 # Elevia
 
+## Installazione
+
+Requisiti: Python 3.13 o successivo e `uv`.
+
+```bash
+git clone https://github.com/miccheth/elevia.git
+cd elevia
+uv sync
+```
+
+### macOS e Linux
+
+```bash
+source .venv/bin/activate
+elevia --help
+```
+
+### Windows PowerShell
+
+```powershell
+.venv\Scripts\Activate.ps1
+elevia --help
+```
+
+Se PowerShell blocca l'attivazione:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.venv\Scripts\Activate.ps1
+elevia --help
+```
+
+### Windows CMD
+
+```bat
+.venv\Scripts\activate.bat
+elevia --help
+```
+
+### Senza attivare l'ambiente
+
+```bash
+uv run elevia --help
+```
+
+Il database viene creato in `.elevia/elevia.db` nella root del clone. Fuori da un clone Git si usa `~/.elevia/elevia.db`.
+
+Per azzerare i dati:
+
+```bash
+elevia reset
+```
+
+Elenco comandi: [docs/COMMANDS.md](docs/COMMANDS.md).
+
 ## Il problema moderno
 
 Gli esseri umani hanno una conoscenza generale del mondo, costruita attraverso esperienze e apprendimento. Il cervello può apprendere e ragionare su problemi molto diversi, ma affrontare un problema preciso richiede informazioni specifiche che non sempre possediamo o riusciamo a richiamare. Anche quando sono disponibili, non possiamo tenerle tutte presenti nello stesso momento: la memoria di lavoro gestisce pochi elementi alla volta, e seguire i dettagli senza perdere la visione d'insieme diventa più difficile con l'aumentare delle informazioni da confrontare.
 
-Nel 2026, il collo di bottiglia è riuscire a usare le informazioni disponibili per affrontare un problema concreto. Chi studia una possibile cura per il diabete, per esempio, deve confrontare risultati, riconoscere contraddizioni e passare dalla domanda generale ai dettagli dei singoli studi. La conoscenza prodotta sull'argomento supera ciò che una persona può tenere contemporaneamente a mente, e ricostruire ogni volta il contesto rende il lavoro più difficile.
+Nel 2026, il collo di bottiglia è riuscire a usare le eccessive informazioni disponibili per affrontare un problema concreto. Chi studia una possibile cura per il diabete, per esempio, deve confrontare risultati, riconoscere contraddizioni e passare dalla domanda generale ai dettagli dei singoli studi. La conoscenza prodotta sull'argomento supera ciò che una persona può tenere contemporaneamente a mente, e ricostruire ogni volta il contesto rende il lavoro più difficile.
 
 Il flusso continuo di informazioni rende questo lavoro ancora più difficile. Un'osservazione in un commento sui social e un risultato descritto in un articolo scientifico possono riguardare lo stesso problema, ma arrivano in contesti separati. Vorrei poterli confrontare senza perdere la provenienza, le prove disponibili e il diverso grado di attendibilità. Mettere in relazione le fonti non significa attribuire a tutte lo stesso valore. L'obiettivo è cercare un «centroide» il più possibile aderente alle prove disponibili: una sintesi ragionata che tenga conto dei contributi pertinenti, senza presumere che la verità coincida con la media delle opinioni.
 
@@ -408,6 +463,8 @@ Il namespace `work` non è il Tag Lavoro: gli Attributes vengono assegnati espli
 # Fase avanzata
 
 La comprensione del linguaggio naturale e l’esplorazione semantica sono sviluppi futuri e non rientrano nel perimetro attuale.
+
+Elevia permetterà di gestire in modo diverso, stile Plugin ogni tipo di file diverso, per avere massima personalizzazione. Tipo un file JPEG uscirà l'anteprima. Un file Font uscirà l'anteprima del font.
 
 
 ____

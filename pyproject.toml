@@ -1,0 +1,20 @@
+[project]
+name = "elevia"
+version = "0.1.0"
+description = "Organizzazione logica di risorse tramite Tag, collocazioni e attributi ricercabili"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "rich>=13.0",
+    "typer>=0.12",
+]
+
+[project.scripts]
+elevia = "app.cli.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/app", "src/config"]
