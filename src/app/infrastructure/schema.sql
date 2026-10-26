@@ -1,5 +1,6 @@
 -- Schema database Elevia
--- Tabelle: OBJECT, LOCAL_FILE_OBJECT, TAG, PLACEMENT, TAGGING
+-- Tabelle: OBJECT, LOCAL_FILE_OBJECT, TAG, PLACEMENT, TAGGING,
+--           ATTRIBUTE_NAMESPACE, ATTRIBUTE_DEFINITION, OBJECT_ATTRIBUTE
 -- Richiede PRAGMA foreign_keys = ON a ogni connessione.
 
 CREATE TABLE IF NOT EXISTS object (
@@ -49,6 +50,42 @@ CREATE TABLE IF NOT EXISTS tagging (
     UNIQUE (object_id, placement_id)
 );
 
+-- Namespace: template di attributi (es. "photo", "work")
+CREATE TABLE IF NOT EXISTS attribute_namespace (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT    NOT NULL COLLATE NOCASE UNIQUE,
+    description TEXT,
+    created_at  TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Definizioni degli attributi dentro un namespace
+CREATE TABLE IF NOT EXISTS attribute_definition (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    namespace_id   INTEGER NOT NULL,
+    key            TEXT    NOT NULL,
+    value_type     TEXT    NOT NULL CHECK (value_type IN ('TEXT', 'NUMBER', 'DATE', 'BOOLEAN', 'ENUM')),
+    allowed_values TEXT,  -- JSON array per ENUM, NULL per altri tipi
+    description    TEXT,
+    created_at     TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (namespace_id) REFERENCES attribute_namespace (id) ON DELETE CASCADE,
+    UNIQUE (namespace_id, key)
+);
+
+-- Valori degli attributi sugli oggetti
+CREATE TABLE IF NOT EXISTS object_attribute (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    object_id     INTEGER NOT NULL,
+    definition_id INTEGER,  -- NULL = attributo libero (senza namespace)
+    namespace     TEXT,     -- copia denormalizzata del nome, NULL = attributo libero
+    key           TEXT    NOT NULL,
+    value         TEXT    NOT NULL,
+    value_type    TEXT    NOT NULL CHECK (value_type IN ('TEXT', 'NUMBER', 'DATE', 'BOOLEAN', 'ENUM')),
+    created_at    TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (object_id) REFERENCES object (id) ON DELETE CASCADE,
+    FOREIGN KEY (definition_id) REFERENCES attribute_definition (id) ON DELETE CASCADE,
+    UNIQUE (object_id, namespace, key)
+);
+
 -- Stesso Tag max 1 Placement per padre
 CREATE UNIQUE INDEX IF NOT EXISTS ux_placement_tag_parent
     ON placement (tag_id, parent_id)
@@ -66,6 +103,18 @@ CREATE INDEX IF NOT EXISTS ix_placement_parent
 -- Filtro sulle assegnazioni (QueryService)
 CREATE INDEX IF NOT EXISTS ix_tagging_placement
     ON tagging (placement_id);
+
+-- Lista attributi di un oggetto
+CREATE INDEX IF NOT EXISTS ix_object_attribute_object
+    ON object_attribute (object_id);
+
+-- Filtro nelle query per namespace, chiave e valore
+CREATE INDEX IF NOT EXISTS ix_object_attribute_lookup
+    ON object_attribute (namespace, key, value);
+
+-- Ricerca per chiave (anche attributi liberi)
+CREATE INDEX IF NOT EXISTS ix_object_attribute_key
+    ON object_attribute (key);
 
 -- Trigger: un Tag di sistema non si rinomina e non si elimina
 CREATE TRIGGER IF NOT EXISTS trg_tag_system_no_rename

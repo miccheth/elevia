@@ -18,6 +18,16 @@ class Condition(Node):
 
 
 @dataclass(frozen=True)
+class AttributeCondition(Node):
+    """Condizione su attributo: ``namespace.chiave = valore`` o ``chiave = valore``."""
+
+    namespace: str | None  # None = attributo libero (senza namespace)
+    key: str
+    operator: str  # =, !=, >, <, >=, <=
+    value: str
+
+
+@dataclass(frozen=True)
 class Group(Node):
     """Espressione tra parentesi."""
 

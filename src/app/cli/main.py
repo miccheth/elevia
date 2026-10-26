@@ -10,6 +10,7 @@ from app.cli.output import print_error
 from app.core.exceptions import EleviaError
 
 from .commands import (
+    attribute_cmd,
     import_cmd,
     object_cmd,
     placement_cmd,
@@ -30,6 +31,7 @@ app = typer.Typer(
 app.add_typer(object_cmd.app, name="object")
 app.add_typer(tag_cmd.app, name="tag")
 app.add_typer(placement_cmd.app, name="placement")
+app.add_typer(attribute_cmd.app, name="attr")
 app.command("tree")(tree_cmd.tree)
 app.command("query")(query_cmd.query)
 app.command("reset")(reset_cmd.reset)

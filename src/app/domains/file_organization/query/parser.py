@@ -2,14 +2,23 @@
 
 Grammatica:
 
-    query     = or_expr ;
-    or_expr   = and_expr , { "OR" , and_expr } ;
-    and_expr  = term , { "AND" , term } ;
-    term      = [ "NOT" ] , atom ;
-    atom      = "(" , query , ")" | condition ;
-    condition = "tag:" , value ;
-    value     = "*" | name , { "." , name } ;
-    name      = parola | '"' , testo , '"' ;
+    query          = or_expr ;
+    or_expr        = and_expr , { "OR" , and_expr } ;
+    and_expr       = term , { "AND" , term } ;
+    term           = [ "NOT" ] , atom ;
+    atom           = "(" , query , ")" | condition ;
+    condition      = tag_condition | attr_condition ;
+    tag_condition  = "tag:" , tag_value ;
+    tag_value      = "*" | name , { "." , name } ;
+    attr_condition = attr_path , operator , value ;
+    attr_path      = [ name , "." ] , name ;
+    operator       = "=" | "!=" | ">" | "<" | ">=" | "<=" ;
+    value          = string | number | date | boolean ;
+    name           = parola | '"' , testo , '"' ;
+    string         = '"' , testo , '"' ;
+    number         = [ "-" ] , cifra , { cifra } , [ "." , cifra , { cifra } ] ;
+    date           = '"' , YYYY-MM-DD , '"' ;
+    boolean        = "true" | "false" ;
 
 Lo stile richiesto impone le parentesi quando si combinano più condizioni:
 ``tag:A AND tag:B`` è un errore, ``(tag:A) AND (tag:B)`` è valido.
@@ -19,7 +28,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .ast import And, Condition, Group, Node, Not, Or
+from .ast import And, AttributeCondition, Condition, Group, Node, Not, Or
 from .errors import QuerySyntaxError
 
 
@@ -28,6 +37,9 @@ class _Token:
     kind: str
     value: str
     position: int
+
+
+_OPERATORS = {"=", "!=", ">", "<", ">=", "<="}
 
 
 class QueryParser:
@@ -86,6 +98,22 @@ class QueryParser:
         return self._parse_condition()
 
     def _parse_condition(self) -> Node:
+        token = self._peek()
+        if token is None:
+            raise QuerySyntaxError("attesa una condizione", len(self._text))
+
+        if token.kind == "TAG":
+            return self._parse_tag_condition()
+
+        if token.kind in ("WORD", "QUOTED"):
+            return self._parse_attr_condition()
+
+        raise QuerySyntaxError(
+            f"attesa 'tag:' o una condizione attributo, trovato '{token.value or token.kind}'",
+            token.position,
+        )
+
+    def _parse_tag_condition(self) -> Node:
         self._expect("TAG", "attesa la parola chiave 'tag:'")
         if self._match("STAR"):
             token = self._peek()
@@ -102,6 +130,69 @@ class QueryParser:
             segments.append(self._parse_name())
         return Condition(segments=tuple(segments))
 
+    def _parse_attr_condition(self) -> Node:
+        # attr_path = [ name , "." ] , name
+        first = self._parse_name()
+        namespace: str | None = None
+        key = first
+
+        if self._match("DOT"):
+            namespace = first
+            key = self._parse_name()
+
+        # operator
+        operator = self._parse_operator()
+
+        # value
+        value = self._parse_value()
+
+        return AttributeCondition(
+            namespace=namespace,
+            key=key,
+            operator=operator,
+            value=value,
+        )
+
+    def _parse_operator(self) -> str:
+        token = self._peek()
+        if token is None:
+            raise QuerySyntaxError("atteso un operatore (=, !=, >, <, >=, <=)", len(self._text))
+        if token.kind == "OP":
+            self._index += 1
+            return token.value
+        raise QuerySyntaxError(
+            f"atteso un operatore (=, !=, >, <, >=, <=), trovato '{token.value or token.kind}'",
+            token.position,
+        )
+
+    def _parse_value(self) -> str:
+        token = self._peek()
+        if token is None:
+            raise QuerySyntaxError("atteso un valore", len(self._text))
+
+        if token.kind == "QUOTED":
+            self._index += 1
+            return token.value
+
+        if token.kind == "NUMBER":
+            self._index += 1
+            return token.value
+
+        if token.kind == "WORD":
+            lowered = token.value.lower()
+            if lowered in ("true", "false"):
+                self._index += 1
+                return lowered
+            # Potrebbe essere una data senza virgolette? No, le date richiedono virgolette.
+            # Ma accettiamo anche parole come valore (verrà validato dopo).
+            self._index += 1
+            return token.value
+
+        raise QuerySyntaxError(
+            f"atteso un valore (stringa, numero, data o booleano), trovato '{token.value or token.kind}'",
+            token.position,
+        )
+
     def _parse_name(self) -> str:
         if self._match("QUOTED"):
             value = self._previous().value
@@ -112,7 +203,7 @@ class QueryParser:
             return self._previous().value
         token = self._peek()
         position = token.position if token is not None else len(self._text)
-        raise QuerySyntaxError("atteso un nome di Tag", position)
+        raise QuerySyntaxError("atteso un nome", position)
 
     # --- Supporto -----------------------------------------------------------
 
@@ -197,10 +288,47 @@ def _tokenize(text: str) -> list[_Token]:
         if char == ":":
             raise QuerySyntaxError("':' inatteso", index)
 
+        # Operatori
+        if char in ("=", "!", ">", "<"):
+            start = index
+            if char == "!" and index + 1 < length and text[index + 1] == "=":
+                tokens.append(_Token("OP", "!=", start))
+                index += 2
+                continue
+            if char in (">", "<") and index + 1 < length and text[index + 1] == "=":
+                tokens.append(_Token("OP", char + "=", start))
+                index += 2
+                continue
+            if char == "=":
+                tokens.append(_Token("OP", "=", start))
+                index += 1
+                continue
+            if char == "!":
+                raise QuerySyntaxError("'!' da solo non è un operatore valido (usa !=)", start)
+            # > o < da soli
+            tokens.append(_Token("OP", char, start))
+            index += 1
+            continue
+
+        # Numeri (interi o decimali, con segno opzionale)
+        if char.isdigit() or (char == "-" and index + 1 < length and text[index + 1].isdigit()):
+            start = index
+            if char == "-":
+                index += 1
+            while index < length and text[index].isdigit():
+                index += 1
+            if index < length and text[index] == "." and index + 1 < length and text[index + 1].isdigit():
+                index += 1
+                while index < length and text[index].isdigit():
+                    index += 1
+            tokens.append(_Token("NUMBER", text[start:index], start))
+            continue
+
+        # Parole
         start = index
         while index < length:
             current = text[index]
-            if current.isspace() or current in '()"*.:':
+            if current.isspace() or current in '()"*.:=!<>':
                 break
             index += 1
         word = text[start:index]

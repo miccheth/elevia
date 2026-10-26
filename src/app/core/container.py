@@ -2,8 +2,17 @@
 
 from __future__ import annotations
 
+from app.domains.file_organization.services.attribute_definition_service import (
+    AttributeDefinitionService,
+)
+from app.domains.file_organization.services.attribute_namespace_service import (
+    AttributeNamespaceService,
+)
 from app.domains.file_organization.services.local_file_object_service import (
     LocalFileObjectService,
+)
+from app.domains.file_organization.services.object_attribute_service import (
+    ObjectAttributeService,
 )
 from app.domains.file_organization.services.object_service import ObjectService
 from app.domains.file_organization.services.placement_service import PlacementService
@@ -16,7 +25,10 @@ from app.domains.file_organization.services.tag_service import TagService
 from app.domains.file_organization.services.tagging_service import TaggingService
 from app.infrastructure.database import Database
 from app.infrastructure.repositories.sqlite import (
+    SqliteAttributeDefinitionRepository,
+    SqliteAttributeNamespaceRepository,
     SqliteLocalFileObjectRepository,
+    SqliteObjectAttributeRepository,
     SqliteObjectRepository,
     SqlitePlacementRepository,
     SqliteTaggingRepository,
@@ -43,6 +55,9 @@ class Container:
         self.tags = SqliteTagRepository(self.database)
         self.placements = SqlitePlacementRepository(self.database)
         self.taggings = SqliteTaggingRepository(self.database)
+        self.attribute_namespaces = SqliteAttributeNamespaceRepository(self.database)
+        self.attribute_definitions = SqliteAttributeDefinitionRepository(self.database)
+        self.object_attributes = SqliteObjectAttributeRepository(self.database)
 
         self.previews = PreviewService(
             self.transaction_manager, self.tags, self.placements, self.taggings
@@ -86,6 +101,22 @@ class Container:
         )
         self.tree_service = TagPlacementTreeService(
             self.tags, self.placements, self.taggings
+        )
+        self.attribute_namespace_service = AttributeNamespaceService(
+            self.attribute_namespaces,
+            self.transaction_manager,
+        )
+        self.attribute_definition_service = AttributeDefinitionService(
+            self.attribute_definitions,
+            self.attribute_namespaces,
+            self.transaction_manager,
+        )
+        self.object_attribute_service = ObjectAttributeService(
+            self.object_attributes,
+            self.attribute_definitions,
+            self.attribute_namespaces,
+            self.objects,
+            self.transaction_manager,
         )
         self.query_service = QueryService(self.transaction_manager)
         self._available_check: LocalFileAvailableCheck | None = None

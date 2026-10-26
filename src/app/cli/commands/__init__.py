@@ -1,6 +1,7 @@
 """Sottocomandi della CLI."""
 
 from . import (
+    attribute_cmd,
     import_cmd,
     object_cmd,
     placement_cmd,
@@ -11,6 +12,7 @@ from . import (
 )
 
 __all__ = [
+    "attribute_cmd",
     "import_cmd",
     "object_cmd",
     "placement_cmd",

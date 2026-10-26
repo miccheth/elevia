@@ -53,7 +53,7 @@ Per azzerare i dati:
 elevia reset
 ```
 
-Elenco comandi: [docs/COMMANDS.md](docs/COMMANDS.md).
+Elenco comandi: [docs/cli/CLI_COMMANDS.md](docs/cli/CLI_COMMANDS.md).
 
 ## Il problema moderno
 
@@ -465,6 +465,8 @@ Il namespace `work` non è il Tag Lavoro: gli Attributes vengono assegnati espli
 La comprensione del linguaggio naturale e l’esplorazione semantica sono sviluppi futuri e non rientrano nel perimetro attuale.
 
 Elevia permetterà di gestire in modo diverso, stile Plugin ogni tipo di file diverso, per avere massima personalizzazione. Tipo un file JPEG uscirà l'anteprima. Un file Font uscirà l'anteprima del font.
+
+Elevia permetterà anche di importare direttamente gli oggetti all'interno, senza che sia solo un riferimento esterno.
 
 
 ____
