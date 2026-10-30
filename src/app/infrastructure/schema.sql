@@ -96,6 +96,25 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_placement_tag_root
     ON placement (tag_id)
     WHERE parent_id IS NULL;
 
+-- Un Tag di sistema ammette solo il Placement radice (R46)
+CREATE TRIGGER IF NOT EXISTS trg_placement_system_tag_insert
+BEFORE INSERT ON placement
+FOR EACH ROW
+WHEN NEW.parent_id IS NOT NULL
+ AND (SELECT is_system FROM tag WHERE id = NEW.tag_id) = 1
+BEGIN
+    SELECT RAISE(ABORT, 'Un Tag di sistema ammette solo il Placement radice');
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_placement_system_tag_update
+BEFORE UPDATE OF tag_id, parent_id ON placement
+FOR EACH ROW
+WHEN NEW.parent_id IS NOT NULL
+ AND (SELECT is_system FROM tag WHERE id = NEW.tag_id) = 1
+BEGIN
+    SELECT RAISE(ABORT, 'Un Tag di sistema ammette solo il Placement radice');
+END;
+
 -- Ricostruzione dei percorsi (QueryService)
 CREATE INDEX IF NOT EXISTS ix_placement_parent
     ON placement (parent_id);

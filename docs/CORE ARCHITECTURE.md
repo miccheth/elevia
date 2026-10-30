@@ -137,7 +137,7 @@ erDiagram
 - **R10:** Rinominare Tag non interrompe assegnazioni ai Placement
 - **R11:** Eliminare Tag solo dopo aver risolto tutti i suoi Placement
 - **R12:** Nessun alias automatico per un TAG ritirato
-- **R46:** Il Tag `Untagged` è nativo: esiste dal seed iniziale con `is_system = 1`, insieme al suo Placement radice
+- **R46:** Il Tag `Untagged` è nativo: esiste dal seed iniziale con `is_system = 1`, insieme al suo Placement radice. Un Tag di sistema ammette solo il Placement radice e non può essere usato per crearne altri
 - **R47:** Un Tag con `is_system = 1` non può essere rinominato, eliminato né usato come sorgente di una fusione
 - **R48:** `Untagged` non è una scorciatoia per gli oggetti senza Tag: è la collocazione assegnata quando l'ultima Tagging viene rimossa (R1, R25)
 

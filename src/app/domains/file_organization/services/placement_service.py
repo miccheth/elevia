@@ -130,7 +130,11 @@ class PlacementService:
         def before(conn: Any) -> None:
             placement = self._require(placement_id, conn)
             tag = self._tags.get(placement.tag_id, conn)
-            if tag is not None and tag.is_system:
+            if (
+                tag is not None
+                and tag.is_system
+                and placement.parent_id is None
+            ):
                 raise ConflictError(
                     "Il Placement radice del Tag di sistema non può essere eliminato (R46)"
                 )
@@ -221,6 +225,11 @@ class PlacementService:
         return self._tags.get_by_name(reference, conn)
 
     def _ensure_slot(self, conn: Any, tag_id: int, parent_id: int | None) -> None:
+        tag = self._tags.get(tag_id, conn)
+        if tag is not None and tag.is_system:
+            raise ConflictError(
+                f"Il Tag di sistema '{tag.name}' ammette solo il Placement radice (R46)"
+            )
         if parent_id is not None:
             parent = self._require(parent_id, conn)
             if parent.tag_id == tag_id:

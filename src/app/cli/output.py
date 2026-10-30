@@ -68,7 +68,7 @@ def print_local_files(files: list[LocalFileObject]) -> None:
             str(item.id),
             item.name,
             item.file_path,
-            "sì" if item.is_available else "no",
+            "yes" if item.is_available else "no",
             str(item.file_size),
         )
     console.print(table)

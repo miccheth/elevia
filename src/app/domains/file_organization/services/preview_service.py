@@ -114,9 +114,14 @@ class PreviewService:
         conflicts: list[str] = []
         placement = index.placements.get(placement_id)
         tag = index.tags.get(placement.tag_id) if placement is not None else None
-        if tag is not None and tag.is_system:
+        if (
+            tag is not None
+            and tag.is_system
+            and placement is not None
+            and placement.parent_id is None
+        ):
             conflicts.append(
-                "Il Placement del Tag di sistema non può essere eliminato (R46)"
+                "Il Placement radice del Tag di sistema non può essere eliminato (R46)"
             )
         children = self._placements.list_children(placement_id)
         assignments = self._taggings.count_by_placement(placement_id)

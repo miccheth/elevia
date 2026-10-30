@@ -59,6 +59,9 @@ elevia object file relink OBJECT_ID ./nuovo/percorso.pdf --yes
 elevia tree
 ```
 
+`Untagged` è un Tag di sistema: ammette solo il proprio Placement radice e non
+può essere usato per creare un nuovo Placement, per esempio `Elevia.Untagged`.
+
 ## Attributi
 
 ### Namespace (template di attributi)
@@ -109,6 +112,10 @@ elevia attr set show OBJECT_ID
 ```
 
 ## Query
+
+Metti sempre l'espressione tra apici. La shell interpreta `>` e `<` come
+redirezioni: `elevia query prezzo > 100` crea un file `100` e non esegue il
+confronto. Usa `elevia query 'prezzo > 100'`.
 
 ### Condizioni sui Tag
 
