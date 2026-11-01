@@ -1,22 +1,65 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import { spawn } from 'child_process'
+import { electronApp, is } from '@electron-toolkit/utils'
+import icon from '../../resources/elevia-icon.png?asset'
+import dockIcon from '../../resources/elevia-dock.png?asset'
+import type { VocabularyRequest, VocabularyResponse } from '../preload/vocabulary'
+
+function runVocabulary(request: VocabularyRequest): Promise<VocabularyResponse> {
+  if (app.isPackaged) {
+    return Promise.resolve({ error: 'Il core non è ancora disponibile nella versione installata.' })
+  }
+
+  const root = join(app.getAppPath(), '..')
+  const python = join(
+    root,
+    '.venv',
+    process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python'
+  )
+  return new Promise((resolve) => {
+    const child = spawn(python, ['-m', 'app.desktop_bridge'], { cwd: root })
+    let output = ''
+    child.stdout.setEncoding('utf8')
+    child.stdout.on('data', (chunk: string) => {
+      output += chunk
+    })
+    child.on('error', () =>
+      resolve({ error: 'Impossibile avviare il core. Controlla che .venv sia configurato.' })
+    )
+    child.on('close', (code) => {
+      try {
+        resolve(
+          code === 0 ? JSON.parse(output) : { error: 'Errore durante l’esecuzione del core.' }
+        )
+      } catch {
+        resolve({ error: 'Risposta non valida dal core.' })
+      }
+    })
+    child.stdin.on('error', () => {})
+    child.stdin.end(JSON.stringify(request))
+  })
+}
 
 function createWindow(): void {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
-    backgroundColor: '#18191c',
+    width: Math.round(width * 0.85),
+    height: Math.round(height * 0.85),
+    resizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    backgroundColor: '#0d1630',
     ...(process.platform === 'darwin'
       ? { titleBarStyle: 'hidden' as const, trafficLightPosition: { x: 16, y: 17 } }
       : {}),
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    ...(process.platform !== 'darwin' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
+      devTools: false,
       sandbox: false
     }
   })
@@ -42,15 +85,31 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
+// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  ipcMain.handle('vocabulary', (_, request: VocabularyRequest) => runVocabulary(request))
+  if (process.platform === 'darwin' && is.dev) {
+    app.dock?.setIcon(dockIcon)
+    app.on('will-quit', () => app.dock?.hide())
+  }
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
+    window.webContents.on('before-input-event', (event, input) => {
+      if (input.type !== 'keyDown') return
+
+      const commandOrControl = input.control || input.meta
+      const devToolsShortcut =
+        input.code === 'F12' ||
+        (((input.control && input.shift) || (input.meta && input.alt)) &&
+          ['KeyI', 'KeyJ', 'KeyC'].includes(input.code))
+      const reloadShortcut = !is.dev && commandOrControl && input.code === 'KeyR'
+      const zoomShortcut =
+        commandOrControl && (input.code === 'Minus' || (input.code === 'Equal' && input.shift))
+
+      if (devToolsShortcut || reloadShortcut || zoomShortcut) event.preventDefault()
+    })
   })
 
   // IPC test

@@ -1,44 +1,10 @@
 import { useState } from 'react'
-
-const exampleTags = [
-  { name: 'Fotografia', children: ['Paesaggi', 'Ritratti', 'Architettura'] },
-  { name: 'Progetti', children: ['Identità visiva', 'Interfacce', 'Illustrazioni'] },
-  { name: 'Automobili', children: ['Ferrari', 'Modellini'] }
-]
-
-function highlightMatch(name: string, filter: string): React.ReactNode {
-  if (!filter) return name
-
-  const parts: React.ReactNode[] = []
-  const lowerName = name.toLocaleLowerCase()
-  let start = 0
-  let match = lowerName.indexOf(filter)
-
-  while (match !== -1) {
-    parts.push(name.slice(start, match))
-    parts.push(<mark key={match}>{name.slice(match, match + filter.length)}</mark>)
-    start = match + filter.length
-    match = lowerName.indexOf(filter, start)
-  }
-
-  parts.push(name.slice(start))
-  return parts
-}
+import { Vocabulary } from './components/Vocabulary'
 
 function App(): React.JSX.Element {
   const [selected, setSelected] = useState<string>('all')
-  const [tagFilter, setTagFilter] = useState('')
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const isMac = window.electron.process.platform === 'darwin'
-  const filter = tagFilter.trim().toLocaleLowerCase()
-  const visibleTags = exampleTags
-    .map((group) => ({
-      ...group,
-      children: group.name.toLocaleLowerCase().includes(filter)
-        ? group.children
-        : group.children.filter((name) => name.toLocaleLowerCase().includes(filter))
-    }))
-    .filter((group) => group.name.toLocaleLowerCase().includes(filter) || group.children.length > 0)
 
   return (
     <div className="app">
@@ -57,7 +23,6 @@ function App(): React.JSX.Element {
           </button>
         </div>
 
-        <div className="sidebar__brand">Elevia</div>
         <nav className="sidebar__nav" aria-label="Risorse">
           <button
             className={`nav-item${selected === 'all' ? ' nav-item--selected' : ''}`}
@@ -83,60 +48,7 @@ function App(): React.JSX.Element {
             <span>Untagged</span>
           </button>
         </nav>
-        <section className="sidebar__tags" aria-label="Tags Tree">
-          <div className="sidebar__separator" />
-          <div className="tag-tree">
-            {visibleTags.map((group) => (
-              <details className="tag-tree__group" key={`${group.name}/${filter}`} open>
-                <summary className="tag-tree__parent">
-                  <svg className="tag-tree__chevron" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="m9 6 6 6-6 6" />
-                  </svg>
-                  <svg className="tag-tree__parent-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 3 20 7.5v9L12 21l-8-4.5v-9L12 3Z" />
-                    <path d="m4 7.5 8 4.5 8-4.5M12 12v9" />
-                  </svg>
-                  <span>{highlightMatch(group.name, filter)}</span>
-                </summary>
-                <ul className="tag-tree__children">
-                  {group.children.map((name) => (
-                    <li key={name}>
-                      <button
-                        className={`tag-tree__child${selected === `${group.name}/${name}` ? ' tag-tree__child--selected' : ''}`}
-                        type="button"
-                        aria-pressed={selected === `${group.name}/${name}`}
-                        onClick={() => setSelected(`${group.name}/${name}`)}
-                      >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                          <path d="M4 4h7l9 9-7 7-9-9V4Z" />
-                          <circle cx="8" cy="8" r="1" />
-                        </svg>
-                        <span>{highlightMatch(name, filter)}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            ))}
-            {visibleTags.length === 0 && (
-              <p className="tag-tree__empty" role="status">
-                Nessun tag trovato
-              </p>
-            )}
-          </div>
-        </section>
-        <label className="sidebar__filter">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3 5h18l-7 8v6l-4 2v-8z" />
-          </svg>
-          <input
-            type="search"
-            placeholder="Filter"
-            aria-label="Filtra tag"
-            value={tagFilter}
-            onChange={(event) => setTagFilter(event.target.value)}
-          />
-        </label>
+        <Vocabulary selected={selected} onSelect={setSelected} />
       </aside>
       <main className="workspace">
         <form

@@ -1,5 +1,5 @@
 :root {
-  --color-theme: #18191c;
+  --color-theme: #0d1630;
   --color-primary: #3297ff;
   --color-text-primary: #f8f9fb;
   --color-text-secondary: rgb(248 249 251 / 70%);
@@ -27,7 +27,14 @@ body,
 
 body {
   color: var(--color-text-primary);
-  font-family: 'SF Pro Text', -apple-system, Roboto, system-ui, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  font-family:
+    'SF Pro Text',
+    -apple-system,
+    Roboto,
+    system-ui,
+    'Segoe UI',
+    'Helvetica Neue',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -42,6 +49,10 @@ button {
 .app {
   display: flex;
   height: 100%;
+  user-select: none;
+}
+input {
+  user-select: text;
 }
 .workspace {
   display: flex;
@@ -162,14 +173,14 @@ button {
   stroke: rgb(248 249 251 / 12%);
 }
 .gallery-empty__front {
-  fill: #22262e;
+  fill: #19243d;
   stroke: rgb(248 249 251 / 22%);
 }
 .gallery-empty__lines {
   stroke: rgb(248 249 251 / 35%);
 }
 .gallery-empty__accent {
-  fill: #252e3c;
+  fill: #1b2c4b;
   stroke: var(--color-primary);
 }
 .gallery-empty__plus {
@@ -186,7 +197,7 @@ button {
   font-size: 13px;
 }
 .sidebar {
-  width: 250px;
+  width: 200px;
   flex: none;
   display: flex;
   flex-direction: column;
@@ -236,16 +247,8 @@ svg {
   stroke-linejoin: round;
   flex: none;
 }
-.sidebar__brand {
-  height: 38px;
-  padding: 0 19px 12px;
-  display: flex;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 600;
-}
 .sidebar__nav {
-  padding: 0 8px 0 15px;
+  padding: 0 8px;
 }
 .nav-item {
   display: flex;
@@ -259,6 +262,7 @@ svg {
   background: transparent;
   text-align: left;
   font-size: 13px;
+  line-height: 26px;
   cursor: default;
 }
 .nav-item:hover {
@@ -270,13 +274,13 @@ svg {
 }
 .nav-item svg,
 .sidebar__filter svg {
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 .sidebar__tags {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 12px 20px;
+  padding: 12px 20px 12px 12px;
 }
 .sidebar__separator {
   height: 1px;
@@ -285,11 +289,14 @@ svg {
 }
 .tag-tree {
   margin-left: -9px;
+  padding: 0;
+  list-style: none;
   font-size: 13px;
+  line-height: 26px;
 }
 .tag-tree mark {
-  color: var(--color-text-primary);
-  background: rgb(50 151 255 / 35%);
+  color: #ffffff;
+  background: #0072ef;
   border-radius: 2px;
 }
 .tag-tree__empty {
@@ -323,7 +330,7 @@ svg {
 .tag-tree__chevron {
   width: 12px;
   height: 12px;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
   transition: transform 150ms ease;
 }
 .tag-tree__group[open] .tag-tree__chevron {
@@ -331,7 +338,7 @@ svg {
 }
 .tag-tree__parent-icon,
 .tag-tree__child svg {
-  color: var(--color-primary);
+  color: var(--color-text-primary);
 }
 .tag-tree__children {
   margin: 0 0 4px 22px;
@@ -340,10 +347,71 @@ svg {
   border-left: 1px solid rgb(50 151 255 / 35%);
   border-bottom-left-radius: 6px;
 }
+.vocabulary__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+.vocabulary__editor {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0;
+  font-size: 12px;
+}
+.vocabulary__editor input {
+  width: 100%;
+  padding: 5px;
+  color: var(--color-text-primary);
+  background: var(--color-input-background);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 4px;
+}
+.vocabulary__editor button,
+.tag-tree__menu button {
+  color: var(--color-text-primary);
+  background: var(--color-bg-hover);
+  border: 0;
+  border-radius: 4px;
+  padding: 5px;
+  cursor: pointer;
+}
+.vocabulary__editor button + button {
+  margin-left: 6px;
+}
+.vocabulary__error {
+  color: #ff9b9b;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.tag-tree__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tag-tree__menu-button {
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+}
+.tag-tree__menu {
+  display: grid;
+  gap: 2px;
+  padding: 4px 0 4px 24px;
+}
+.tag-tree__menu button {
+  text-align: left;
+  font-size: 12px;
+}
 .tag-tree__child {
   width: 100%;
   padding: 0 4px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   background: transparent;
   border: 0;
   text-align: left;

@@ -1,8 +1,12 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import type { VocabularyRequest, VocabularyResponse } from './vocabulary'
 
 // Custom APIs for renderer
-const api = {}
+const api = {
+  vocabulary: (request: VocabularyRequest): Promise<VocabularyResponse> =>
+    ipcRenderer.invoke('vocabulary', request)
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise

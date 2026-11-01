@@ -12,13 +12,18 @@ files:
 asarUnpack:
   - resources/**
 win:
+  icon: resources/elevia-icon.ico
   executableName: elevia-desktop
 nsis:
+  installerIcon: resources/elevia-icon.ico
+  uninstallerIcon: resources/elevia-icon.ico
+  installerHeaderIcon: resources/elevia-icon.ico
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 mac:
+  icon: resources/elevia-dock.icns
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
@@ -29,6 +34,7 @@ mac:
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
+  icon: resources/elevia-icon-linux.png
   target:
     - AppImage
     - snap
