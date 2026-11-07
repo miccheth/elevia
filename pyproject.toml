@@ -1,7 +1,7 @@
 [project]
 name = "elevia"
 version = "0.1.0"
-description = "Organizzazione logica di risorse tramite Tag, collocazioni e attributi ricercabili"
+description = "Descrizione non ancora disponibile"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

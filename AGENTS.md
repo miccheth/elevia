@@ -1,12 +1,15 @@
-# Regole
+# Rules
 
-- **Non leggere mai** il contenuto della cartella `_private/`
-- Identificatori in inglese (funzioni, variabili, classi, tipi); commenti e docstring nella lingua dell'utente
+- **Never read** the contents of the `_private/` directory.
+- Write identifiers (functions, variables, classes, types), comments, and docstrings in English.
+- Write code identifiers, comments, docstrings, documentation and commit
+  messages in English.
+- Respond to the user in the language they use, unless asked otherwise.
 
-# Guide e risorse
+# Guides and Resources
 
-| File                                                                    | Cosa contiene                                                                    | Quando usarlo                                            |
-| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| [.agent/it_IT/reference/ai-slop.md](.agent/it_IT/reference/ai-slop.md)  | Guida completa: segnali tipici, principi, fonti                                  | Per capire cos'è l'AI slop e perché evitarlo             |
-| [.agent/it_IT/rules/anti-slop.md](.agent/it_IT/rules/anti-slop.md)      | 10 regole pratiche (niente preamboli, parole semplici, no trattini lunghi, ecc.) | Prima e durante la scrittura di qualsiasi testo in prosa |
-| [agent/it_IT/rules/ai-slop-eval.md](.agent/it_IT/rules/ai-slop-eval.md) | Checklist di verifica (27 controlli)                                             | Dopo aver pensato, prima di agire sulla modifica         |
+| File | Contents | When to use it |
+| --- | --- | --- |
+| [.agent/reference/ai-slop.md](.agent/reference/ai-slop.md) | Complete guide: common signs, principles, and sources | To understand what AI slop is and why to avoid it |
+| [.agent/rules/anti-slop.md](.agent/rules/anti-slop.md) | 10 practical rules (no preambles, simple words, no em dashes, etc.) | Before and while writing any prose |
+| [agent/rules/ai-slop-eval.md](.agent/rules/ai-slop-eval.md) | Review checklist (27 checks) | After thinking, before making a change |
