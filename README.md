@@ -57,7 +57,7 @@ Each file, document, or resource is represented by an abstract `Object`. Assignm
 
 ### Tag and Placement Structure
 
-​```
+```text
 Tag
 ├── Stable identity of a concept
 └── Can be reused across multiple placements
@@ -74,8 +74,8 @@ Tagging
 Using the same Tag in two contexts
 ├── Create two distinct placements
 └── The Tag and its objects are not duplicated
-​```
-
+```
+​
 ### Attributes
 
 **Attributes** describe structured properties associated with a resource, such as year, author, format, or amount. Each resource can have different attributes depending on its type and the information available.
