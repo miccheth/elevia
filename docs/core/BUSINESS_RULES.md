@@ -1,5 +1,14 @@
 # BUSINESS RULES
 
+The rules below describe the current model. The planned snapshot import rules
+are listed separately until they are implemented.
+
+## Planned File Import Rules
+
+- Importing a file copies it into Elevia as a snapshot. The original file is not moved, modified, or deleted.
+- Changes to the original file do not automatically change the imported copy.
+- When removing an Object with an imported copy, Elevia asks whether to delete the copy. The copy is deleted only if the user confirms; otherwise it is retained. The original file is unaffected.
+
 ## OBJECT Rules (R1–R7)
 
 - **R1:** A registered Object has at least one TAGGING. If unassigned, it is assigned to the default `Untagged` Tag.
@@ -13,31 +22,31 @@
 ## TAG Rules (R8–R12, R46–R48)
 
 - **R8:** Tag names are unique and case insensitive.
-- **R9:** Every Tag is created with a root Placement. If it is not placed under a parent, it remains visible on its own as a parent Tag.
-- **R10:** Renaming a Tag does not break assignments to its Placements.
-- **R11:** A Tag can be deleted only after all its non-root Placements have been resolved. Its empty root Placement is removed with the Tag.
+- **R9:** Every Tag is created with a root Branch. If it is not placed under a parent, it remains visible on its own as a parent Tag.
+- **R10:** Renaming a Tag does not break assignments to its Branches.
+- **R11:** A Tag can be deleted only after all its non-root Branches have been resolved. Its empty root Branch is removed with the Tag.
 - **R12:** No automatic alias is created for a retired Tag.
-- **R46:** `Untagged` is a built-in Tag. It exists from the initial seed with `is_system = 1`, together with its root Placement. A system Tag can have only its root Placement and cannot be used to create additional Placements.
+- **R46:** `Untagged` is a built-in Tag. It exists from the initial seed with `is_system = 1`, together with its root Branch. A system Tag can have only its root Branch and cannot be used to create additional Branches.
 - **R47:** A Tag with `is_system = 1` cannot be renamed, deleted, or used as the source of a merge.
-- **R48:** `Untagged` is not a shortcut for Objects without Tags. Its Placement is assigned when the last Tagging is removed (R1, R25).
+- **R48:** `Untagged` is not a shortcut for Objects without Tags. Its Branch is assigned when the last Tagging is removed (R1, R25).
 
-## PLACEMENT Rules (R13–R21)
+## BRANCH Rules (R13–R21)
 
-- **R13:** A Placement has at most one parent.
-- **R14:** `parent_id = NULL` indicates a root Placement.
-- **R15:** A Tag has at most one root Placement.
+- **R13:** A Branch has at most one parent.
+- **R14:** `parent_id = NULL` indicates a root Branch.
+- **R15:** A Tag has at most one root Branch.
 - **R16:** The same Tag can appear at most once under the same parent.
-- **R17:** The same Tag can have multiple Placements in different contexts.
-- **R18:** Children are not automatically shared between Placements of the same Tag.
-- **R19:** Moving a Placement preserves its identity, descendants, and assignments. A branch cannot be moved into itself or one of its descendants.
-- **R20:** A Placement can be deleted only if it has no children and no assignments. Recursive deletion is not automatic.
-- **R21:** Adding a Placement creates an empty Placement without copying anything. Moving a Placement where the same Tag already exists is not allowed without an explicit conflict.
+- **R17:** The same Tag can have multiple Branches in different contexts.
+- **R18:** Children are not automatically shared between Branches of the same Tag.
+- **R19:** Moving a Branch preserves its identity, descendants, and assignments. A branch cannot be moved into itself or one of its descendants.
+- **R20:** A Branch can be deleted only if it has no children and no assignments. Recursive deletion is not automatic.
+- **R21:** Adding a Branch creates an empty Branch without copying anything. Moving a Branch where the same Tag already exists is not allowed without an explicit conflict.
 
 ## TAGGING Rules (R22–R29)
 
-- **R22:** The pair `(object_id, placement_id)` is unique.
-- **R23:** No global assignment exists without a Placement.
-- **R24:** An Object can have multiple Taggings assigned to different Placements.
+- **R22:** The pair `(object_id, branch_id)` is unique.
+- **R23:** No global assignment exists without a Branch.
+- **R24:** An Object can have multiple Taggings assigned to different Branches.
 - **R25:** When an Object's last Tagging is removed, the Object is assigned to `Untagged`.
 - **R26:** A transfer requires an existing source assignment. An Object cannot be transferred from a context where it is not assigned.
 - **R27:** A nonexistent destination or Object results in an error.
@@ -68,7 +77,7 @@
 - **R62:** Values are validated against their type when assigned.
 - **R63:** For `ENUM` attributes, the value must be one of the defined `allowed_values`.
 - **R64:** Deleting an Object deletes all its attributes (CASCADE).
-- **R65:** Attributes are independent of Tags and Placements. They can be used in global queries or queries limited to a branch.
+- **R65:** Attributes are independent of Tags and Branches. They can be used in global queries or queries limited to a branch.
 
 ### QUERY Rules (R66–R73)
 
@@ -88,24 +97,14 @@ operation passes through it: it validates the proposed state against all
 rules and executes the transaction only if all rules are satisfied
 (all-or-nothing).
 
-- **R74:** No cycles are allowed between Placements. A Placement cannot be
-  its own parent or the parent of one of its ancestors.
-- **R75:** No cycles are allowed between Tag identities. The global graph
-  must be acyclic.
+- **R74:** No cycles are allowed between Branches. A Branch cannot be its own parent or the parent of one of its ancestors.
+- **R75:** No cycles are allowed between Tag identities. The global graph must be acyclic.
 - **R76:** A→B and B→A cannot coexist, even in separate contexts.
-- **R77:** Deleting a link does not delete other equivalent links. Automatically
-  merging two branches with the same Tag is forbidden. Merging two Tags when
-  the substitution would create a cycle is also forbidden. A merge always
-  requires an explicit choice.
-- **R78:** Each confirmed plan is executed as a single transaction
-  (all-or-nothing).
-- **R79:** If any rule (R1–R84) is violated or an error occurs, no part of
-  the plan is applied.
-- **R80:** Structural changes require a preview showing their impact and
-  conflicts.
+- **R77:** Deleting a link does not delete other equivalent links. Automatically merging two branches with the same Tag is forbidden. Merging two Tags when the substitution would create a cycle is also forbidden. A merge always requires an explicit choice.
+- **R78:** Each confirmed plan is executed as a single transaction (all-or-nothing).
+- **R79:** If any rule (R1–R84) is violated or an error occurs, no part of the plan is applied.
+- **R80:** Structural changes require a preview showing their impact and conflicts.
 - **R81:** A preview does not modify data and does not count as confirmation.
-- **R82:** Upon confirmation, the TransactionManager rechecks references,
-  constraints (R1–R84), and the state used for the preview.
+- **R82:** Upon confirmation, the TransactionManager rechecks references, constraints (R1–R84), and the state used for the preview.
 - **R83:** If data has changed since the preview, confirmation is rejected.
-- **R84:** Concurrent operations cannot bypass constraints (database lock).
-  Conflicts cannot be resolved automatically without an explicit user choice.
+- **R84:** Concurrent operations cannot bypass constraints (database lock). Conflicts cannot be resolved automatically without an explicit user choice.

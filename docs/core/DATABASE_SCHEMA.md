@@ -1,6 +1,10 @@
 # DATABASE RELATIONSHIP SCHEMA
 
-  
+This schema describes the current external-file model. Snapshot import will
+require a storage design and schema changes; the fields and migration path
+have not yet been defined. Existing file references must be preserved during
+that transition.
+
 ```text
 Object
 ├── id                 bigint      PK, auto increment, not null
@@ -21,7 +25,7 @@ Object
 ├── Tagging                        0 or more assignments
 │   ├── id             bigint      PK, auto increment, not null
 │   ├── object_id      bigint      FK → Object.id, not null
-│   ├── placement_id   bigint      FK → Placement.id, not null
+│   ├── branch_id   bigint      FK → Branch.id, not null
 │   └── created_at     timestamp   not null
 │
 └── Object Attribute               0 or more attributes
@@ -44,13 +48,13 @@ Tag Registry
     ├── created_at     timestamp   not null
     ├── updated_at     timestamp   not null
     │
-    └── Placement                  0 or more placements of the Tag
+    └── Branch                  0 or more branches of the Tag
         ├── id         bigint      PK, auto increment, not null
         ├── tag_id     bigint      FK → Tag.id, not null
-        ├── parent_id  bigint      FK → Placement.id, nullable
+        ├── parent_id  bigint      FK → Branch.id, nullable
         ├── created_at timestamp   not null
-        ├── parent                 0 or 1 parent Placement
-        ├── children               0 or more child Placements
+        ├── parent                 0 or 1 parent Branch
+        ├── children               0 or more child Branches
         └── taggings               0 or more assignments to Objects
 
 
@@ -74,16 +78,16 @@ Attribute Registry
 
 ## Database Constraints (Schema Level)
 
-- **Primary keys:** `OBJECT.id`, `TAG.id`, `PLACEMENT.id`, `TAGGING.id`,
+- **Primary keys:** `OBJECT.id`, `TAG.id`, `BRANCH.id`, `TAGGING.id`,
   `ATTRIBUTE_NAMESPACE.id`, `ATTRIBUTE_DEFINITION.id`, `OBJECT_ATTRIBUTE.id`
   — auto-increment, NOT NULL; IDs may be reused after `delete()` (internal to the Core).
 
 - **Foreign keys with referential integrity:** references to nonexistent rows are rejected.
   - `LOCAL_FILE_OBJECT.object_id` → `OBJECT.id` (PK and FK, 1:1)
-  - `PLACEMENT.tag_id` → `TAG.id` (NOT NULL)
-  - `PLACEMENT.parent_id` → `PLACEMENT.id` (NULLABLE; NULL = root; at most one parent)
+  - `BRANCH.tag_id` → `TAG.id` (NOT NULL)
+  - `BRANCH.parent_id` → `BRANCH.id` (NULLABLE; NULL = root; at most one parent)
   - `TAGGING.object_id` → `OBJECT.id` (NOT NULL)
-  - `TAGGING.placement_id` → `PLACEMENT.id` (NOT NULL)
+  - `TAGGING.branch_id` → `BRANCH.id` (NOT NULL)
   - `ATTRIBUTE_DEFINITION.namespace_id` → `ATTRIBUTE_NAMESPACE.id` (NOT NULL)
   - `OBJECT_ATTRIBUTE.object_id` → `OBJECT.id` (NOT NULL)
   - `OBJECT_ATTRIBUTE.definition_id` → `ATTRIBUTE_DEFINITION.id`
@@ -91,15 +95,15 @@ Attribute Registry
 
 - **UNIQUE:**
   - `TAG.name` — NOT NULL, case insensitive
-  - `PLACEMENT (tag_id, parent_id)` — at most one Placement per Tag under the same parent
-  - `PLACEMENT (tag_id) WHERE parent_id IS NULL` — at most one root Placement per Tag
-  - `TAGGING (object_id, placement_id)` — an Object can appear at most once in a Placement
+  - `BRANCH (tag_id, parent_id)` — at most one Branch per Tag under the same parent
+  - `BRANCH (tag_id) WHERE parent_id IS NULL` — at most one root Branch per Tag
+  - `TAGGING (object_id, branch_id)` — an Object can appear at most once in a Branch
   - `ATTRIBUTE_NAMESPACE.name` — NOT NULL, case insensitive
   - `ATTRIBUTE_DEFINITION (namespace_id, key)` — each key can appear at most once per namespace
   - `OBJECT_ATTRIBUTE (object_id, namespace, key)` — at most one value per object and key
     (NULL namespace = free attribute)
 
-- **NOT NULL:** all schema fields except `TAG.description`, `PLACEMENT.parent_id`,
+- **NOT NULL:** all schema fields except `TAG.description`, `BRANCH.parent_id`,
   `ATTRIBUTE_NAMESPACE.description`, `ATTRIBUTE_DEFINITION.allowed_values`,
   `ATTRIBUTE_DEFINITION.description`, `OBJECT_ATTRIBUTE.definition_id`, and
   `OBJECT_ATTRIBUTE.namespace`.
@@ -110,8 +114,8 @@ Attribute Registry
   - `OBJECT_ATTRIBUTE.value_type` (TEXT, NUMBER, DATE, BOOLEAN, ENUM)
 
 - **Indexes:**
-  - `PLACEMENT(parent_id)` for path reconstruction
-  - `TAGGING(placement_id)` for filtering assignments
+  - `BRANCH(parent_id)` for path reconstruction
+  - `TAGGING(branch_id)` for filtering assignments
   - `OBJECT_ATTRIBUTE(object_id)` for listing an Object's attributes
   - `OBJECT_ATTRIBUTE(namespace, key, value)` for filtering queries
   - `OBJECT_ATTRIBUTE(key)` for searching by key, including free attributes

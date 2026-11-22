@@ -82,9 +82,9 @@ NOT (tag:Fotografie)
 
 ## Semantics
 
-`tag:X.Y.Z` matches Objects with a Tagging on a Placement whose path contains
+`tag:X.Y.Z` matches Objects with a Tagging on a Branch whose path contains
 the Tags `X`, `Y`, and `Z` consecutively. The path may continue beyond `Z`,
-so Objects assigned to descendant Placements also match.
+so Objects assigned to descendant Branches also match.
 
 | Condition | Returns |
 | --- | --- |

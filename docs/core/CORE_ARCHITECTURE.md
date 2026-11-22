@@ -16,8 +16,8 @@ Elevia Core
 │   ├── Object                          abstract resource
 │   │   └── LocalFileObject             Object representing a local file
 │   ├── Tag                             identity of a concept
-│   ├── Placement                       Tag location; parent_id is self-referential
-│   ├── Tagging                         links Object ↔ Placement
+│   ├── Branch                       Tag location; parent_id is self-referential
+│   ├── Tagging                         links Object ↔ Branch
 │   ├── AttributeNamespace              attribute template
 │   ├── AttributeDefinition             attribute type and allowed values
 │   └── ObjectAttribute                 attribute value on an Object
@@ -26,10 +26,10 @@ Elevia Core
 │   ├── ObjectService                   register, rename, remove
 │   ├── LocalFileObjectService          local-file operations and availability
 │   ├── TaggingService                  assign, transfer, remove
-│   ├── PlacementService                create, move, delete
+│   ├── BranchService                create, move, delete
 │   ├── TagService                      create, rename, delete
 │   ├── PreviewService                  preview the impact of changes
-│   ├── TagPlacementTreeService         build the Placement tree
+│   ├── TagBranchTreeService         build the Branch tree
 │   ├── AttributeNamespaceService       manage namespaces
 │   ├── AttributeDefinitionService      manage attribute definitions
 │   ├── ObjectAttributeService          set, unset, show and infer types
@@ -43,14 +43,14 @@ Elevia Core
     │   ├── ObjectRepository
     │   ├── LocalFileObjectRepository
     │   ├── TagRepository
-    │   ├── PlacementRepository
+    │   ├── BranchRepository
     │   ├── TaggingRepository
     │   ├── AttributeNamespaceRepository
     │   ├── AttributeDefinitionRepository
     │   └── ObjectAttributeRepository
     ├── schema.sql                       tables, indexes and triggers
     ├── migrator                         applies schema changes
-    └── seed                             creates Untagged and its root Placement
+    └── seed                             creates Untagged and its root Branch
 
 Database                                persistent storage
 ```
@@ -61,10 +61,23 @@ coordinate use cases and validation. Database constraints provide additional
 integrity checks, and the TransactionManager ensures that writes within a
 transaction succeed or fail together.
 
+## Planned File Import
+
+The current local-file flow registers a path to an external file. The planned
+import flow will copy the file into Elevia as a snapshot without moving or
+modifying the original. Later changes to the original will not automatically
+change the snapshot.
+
+When an Object is removed, the user will be asked whether to delete its
+imported copy. The copy will be retained unless the user confirms deletion;
+the original file will remain untouched. Storage and recovery of retained
+copies, and the transition for existing external references, are not yet
+defined.
+
 # Operational Flows
 
 ```text
-Import a file
+Register an external file (current flow)
 └── User → import_cmd →
     LocalFileObjectService.register() →
     validate and create Object + LocalFileObject + Tagging atomically →
@@ -83,22 +96,22 @@ Remove an Object from a context
     if removing the last Tagging, assign the Object to Untagged →
     TaggingRepository → Database
 
-Create a Placement
-└── User → PlacementService.create() →
-    validate parent and placement rules → PlacementRepository → Database
+Create a Branch
+└── User → BranchService.create() →
+    validate parent and branch rules → BranchRepository → Database
 
-Move a Placement
+Move a Branch
 └── User → PreviewService → impact preview →
-    user confirmation → PlacementService.move() →
-    revalidate state and constraints → PlacementRepository → Database
+    user confirmation → BranchService.move() →
+    revalidate state and constraints → BranchRepository → Database
 
-Delete a Placement
-└── User → PlacementService.delete() →
-    reject if it has children or assignments → PlacementRepository → Database
+Delete a Branch
+└── User → BranchService.delete() →
+    reject if it has children or assignments → BranchRepository → Database
 
 Delete a Tag
 └── User → TagService.delete() →
-    validate its Placements → TagRepository → Database
+    validate its Branches → TagRepository → Database
 
 Rename an Object or a Tag
 └── User → ObjectService.rename() / TagService.rename() →
@@ -110,9 +123,9 @@ Remove an Object from Elevia
     repositories → Database
     The original file is not deleted.
 
-View the Placement tree — read-only
-└── User → TagPlacementTreeService.get_tree() →
-    PlacementRepository.find_all() → tree structure
+View the Branch tree — read-only
+└── User → TagBranchTreeService.get_tree() →
+    BranchRepository.find_all() → tree structure
 
 Search Objects — read-only
 └── User → QueryService.search(expression) →
