@@ -37,6 +37,21 @@ Someone researching a potential cure for diabetes, for example, must compare num
 5. **Support different scales:** Elevia should help people manage knowledge in contexts ranging from personal files to large research projects.
 
 
+# Documentation
+
+## Core
+
+- [Core Architecture](docs/core/CORE_ARCHITECTURE.md): layers, services, and application entry points.
+- [Business Rules](docs/core/BUSINESS_RULES.md): rules governing the model and planned file imports.
+- [Database Schema](docs/core/DATABASE_SCHEMA.md): database entities, fields, and relationships.
+- [Query](docs/core/QUERY.md): syntax and behavior of read-only searches.
+
+## CLI
+
+- [CLI Commands](docs/cli/CLI_COMMANDS.md): commands for managing and searching resources.
+- [Migration Assistant](docs/cli/MIGRATION_LLM.md): use an LLM to propose a tag structure and generate commands for a folder of files.
+
+
 # Initial Phase
 
 Development focuses on the logical organization of resources through objects, tags, and attributes.
@@ -55,9 +70,9 @@ The goal is to make resources easy to find through **deterministic searches** ba
 
 ### Object
 
-Each file, document, or resource is represented by an abstract `Object`. Assignments to branches allow it to be found from different contexts **without creating copies**. An object can be assigned to multiple branches of the same tag or of different tags.
+`Object` is an abstract base for resources. For now, Elevia creates objects only by importing files. Each object has a unique ID and a required name used as a label; different objects can have the same name. Assignments to branches allow an object to be found from different contexts **without creating copies**. An object can be assigned to multiple branches of the same tag or of different tags.
 
-File import is planned to create a snapshot inside Elevia while leaving the original file unchanged. Later changes to the original will not automatically update the snapshot. When removing an Object, Elevia will ask whether to delete its imported copy; the original file will remain untouched. The current implementation registers a **reference to the external file** instead.
+Import registers a **reference to the original external file**, without copying, moving, or modifying it. Users continue working on that file. Elevia checks for changes while reading and does not use results from a read detected as inconsistent. Removing an object does not delete the file.
 
 ### Tag and Branch Structure
 
@@ -122,7 +137,7 @@ Maintenance features include:
 - **Undo and snapshots:** allow users to reverse operations or restore a saved structure after larger changes.
 - **Health dashboard:** display issues and suggested maintenance actions.
 
-The rules governing assignments, deletion, and transactions are described in the [Business Rules](BUSINESS_RULES.md).
+The rules governing assignments, deletion, and transactions are described in the [Business Rules](docs/core/BUSINESS_RULES.md).
 
 ## Overview Diagram
 
@@ -237,6 +252,8 @@ Unlike the initial interface, which focuses on managing and finding resources, S
 The Intelligent UI offers users an intelligent interface with representations and interactive tools.
 
 Its goal is to support comprehension and reasoning through forms that engage complementary cognitive abilities and different areas of the brain. Visual representations, spatial layout, and colors can make relationships and structures more immediately apparent than a lengthy description, while giving users freedom to explore and imagine. These forms can engage multiple areas of the brain at the same time.
+
+For example, when reading about a place, a map or an image can make its layout easier to grasp than a plain-text description alone. Intelligent UI aims to bring that visual and spatial context alongside text, so users can understand and explore information through both.
 
 ### Insight Engine
 

@@ -1,0 +1,15 @@
+[project]
+name = "elevia-cli"
+version = "0.1.0"
+description = "Command-line interface for Elevia"
+requires-python = ">=3.13"
+dependencies = [
+    "elevia-core",
+]
+
+[tool.uv.sources]
+elevia-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

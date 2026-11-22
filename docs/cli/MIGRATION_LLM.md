@@ -4,8 +4,8 @@ Start with a folder containing your documents, including any subfolders. The
 LLM will use file names and paths to propose an Elevia structure and generate
 the commands needed to import the files.
 
-The original files remain where they are. Elevia is intended to import its own
-copy; check your CLI version's import behavior before running the script.
+The original files remain where they are. Import registers references to them;
+it does not create copies.
 
 This workflow creates tags and branches only. It does not analyze file
 contents or assign attributes.
@@ -63,7 +63,8 @@ ATTACHMENTS
 - Optional lists of tags and branches already present in Elevia.
 
 HOW ELEVIA WORKS
-- An Object represents a resource.
+- An Object is an abstract resource; currently only imported files create Objects.
+  Each Object has a unique ID and a required, non-unique name.
 - A Tag represents a concept with a unique name.
 - A Branch puts a Tag in a context. It has one parent or is a root.
 - The same Tag can appear in different branches, for example:
@@ -108,8 +109,10 @@ SCRIPT RULES
 - Create parent branches before their children. Do not assume
   --create-tags creates intermediate branches.
 - Do not recreate branches already present in the attached lists.
-- Import each included path once, using multiple --in options for
-  all necessary assignments.
+- Import each included path once with an explicit object name using --name.
+  Treat the file path and object name as separate values.
+- Use --in-name or --in-id for each
+  necessary assignment; repeat the options for multiple branches.
 - Every imported file must have at least one branch.
 - Preserve original paths exactly and use safe Bash quoting, including
   for spaces, apostrophes and special characters.

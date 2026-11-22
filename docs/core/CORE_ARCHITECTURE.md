@@ -4,6 +4,11 @@ Elevia Core uses a layered architecture with application services. The CLI
 and desktop application act as entry points; they invoke services rather than
 accessing the database directly.
 
+`Object` is an abstract base for resource types. The current scope creates only
+`LocalFileObject` instances through file import; generic objects are not a
+separately creatable type. An object's ID identifies it; its required name is
+a label that may be shared by multiple objects.
+
 ```text
 External Actors
 ├── User
@@ -31,8 +36,9 @@ Elevia Core
 │   ├── PreviewService                  preview the impact of changes
 │   ├── TagBranchTreeService         build the Branch tree
 │   ├── AttributeNamespaceService       manage namespaces
+│   ├── ObjectNamespaceService          assign namespaces to objects
 │   ├── AttributeDefinitionService      manage attribute definitions
-│   ├── ObjectAttributeService          set, unset, show and infer types
+│   ├── ObjectAttributeService          set, unset and show defined attributes
 │   ├── QueryService                    execute read-only searches
 │   └── QueryParser                     parse Tag and attribute conditions
 │
@@ -46,6 +52,7 @@ Elevia Core
     │   ├── BranchRepository
     │   ├── TaggingRepository
     │   ├── AttributeNamespaceRepository
+    │   ├── ObjectNamespaceRepository
     │   ├── AttributeDefinitionRepository
     │   └── ObjectAttributeRepository
     ├── schema.sql                       tables, indexes and triggers
@@ -61,18 +68,17 @@ coordinate use cases and validation. Database constraints provide additional
 integrity checks, and the TransactionManager ensures that writes within a
 transaction succeed or fail together.
 
-## Planned File Import
+## File Import and Reading
 
-The current local-file flow registers a path to an external file. The planned
-import flow will copy the file into Elevia as a snapshot without moving or
-modifying the original. Later changes to the original will not automatically
-change the snapshot.
+Import registers a path to the original external file, without creating a copy.
+The user continues editing that file; removing the Object does not delete it.
+If a file becomes inaccessible, its Object remains searchable and is marked
+unavailable.
 
-When an Object is removed, the user will be asked whether to delete its
-imported copy. The copy will be retained unless the user confirms deletion;
-the original file will remain untouched. Storage and recovery of retained
-copies, and the transition for existing external references, are not yet
-defined.
+When reading a file, Elevia checks for concurrent changes. If a change is
+detected during the read, it discards the result and retries or reports an
+error. The detection mechanism and retry policy are not yet specified; a check
+alone cannot guarantee that every concurrent change will be detected.
 
 # Operational Flows
 
@@ -100,10 +106,15 @@ Create a Branch
 └── User → BranchService.create() →
     validate parent and branch rules → BranchRepository → Database
 
-Move a Branch
+Move a Branch in Desktop
 └── User → PreviewService → impact preview →
     user confirmation → BranchService.move() →
     revalidate state and constraints → BranchRepository → Database
+
+Move a Branch in CLI
+└── User → BranchService.move() →
+    validate state and constraints → BranchRepository → Database
+    No preview or confirmation; validation and transaction checks still apply.
 
 Delete a Branch
 └── User → BranchService.delete() →
@@ -140,22 +151,31 @@ Create an attribute namespace
 └── User → AttributeNamespaceService.create() →
     validate namespace → AttributeNamespaceRepository → Database
 
-Define an attribute in a namespace
+Define an attribute, with or without a namespace
 └── User → AttributeDefinitionService.create() →
-    validate definition → AttributeDefinitionRepository → Database
+    validate the definition and its type → AttributeDefinitionRepository → Database
+    If a namespace is used, it must already exist.
 
-Assign a namespaced attribute
+Assign a namespace to an Object
+└── User → ObjectNamespaceService.assign() →
+    validate Object and namespace → ObjectNamespaceRepository → Database
+    The complete namespace is assigned; its values default to NULL and may be supplied later.
+
+Set a namespaced attribute value
 └── User → ObjectAttributeService.set() →
-    find definition and validate type and value →
+    check namespace assignment, find definition and validate type and value →
     ObjectAttributeRepository → Database
 
 Assign a free attribute
 └── User → ObjectAttributeService.set() →
-    infer type and validate value → ObjectAttributeRepository → Database
+    find definition and validate type and value →
+    ObjectAttributeRepository → Database
+    The definition and its type must exist before assignment.
 
 Remove an attribute from an Object
 └── User → ObjectAttributeService.unset() →
-    ObjectAttributeRepository → Database
+    remove the stored value → ObjectAttributeRepository → Database
+    The applicable attribute returns to NULL; its definition and namespace assignment remain.
 
 Delete a namespace
 └── User → AttributeNamespaceService.delete() →

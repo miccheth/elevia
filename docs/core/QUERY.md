@@ -46,7 +46,13 @@ the supplied value.
 | `NUMBER` | Integer or decimal number | `photo.year = 2025` |
 | `DATE` | Quoted date in `YYYY-MM-DD` format | `work.deadline < "2025-12-31"` |
 | `BOOLEAN` | `true` or `false` | `published = true` |
-| `ENUM` | Quoted value from the definition's `allowed_values` | `work.status = "approved"` |
+| `ENUM` | A value matching its declared primitive type and a value in `allowed_values` | `work.status = "approved"` or `rating = 1` |
+
+An enum declares one primitive type: `TEXT`, `NUMBER`, `DATE`, or `BOOLEAN`.
+All its values use that type. Text and dates are quoted, numbers are unquoted,
+and Boolean values are `true` or `false`. A numeric enum value is not
+interchangeable with a quoted string containing the same digits.
+Enum comparisons support `=` and `!=`, not ordering operators.
 
 The attribute type distinguishes a date from a text value: both are
 written in quotes. A value incompatible with the attribute type produces
@@ -120,4 +126,3 @@ tag:Lavoro.Ferrari.Contratti → obj-001
 photo.year = 2025 → obj-003 (if obj-003 has photo.year = 2025)
 (tag:Ferrari) AND (photo.year = 2025) → obj-003
 ```
-

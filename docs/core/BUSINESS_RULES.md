@@ -1,16 +1,18 @@
 # BUSINESS RULES
 
-The rules below describe the current model. The planned snapshot import rules
-are listed separately until they are implemented.
+The rules below describe the model and intended file-reading behavior.
 
-## Planned File Import Rules
+## File Import and Reading Rules
 
-- Importing a file copies it into Elevia as a snapshot. The original file is not moved, modified, or deleted.
-- Changes to the original file do not automatically change the imported copy.
-- When removing an Object with an imported copy, Elevia asks whether to delete the copy. The copy is deleted only if the user confirms; otherwise it is retained. The original file is unaffected.
+- Import registers a reference to the original external file. Elevia does not create a managed copy, move the file, or modify it.
+- The user continues working on the original file. Subsequent reads use that file rather than a stored snapshot.
+- If a change is detected during a read, Elevia discards results from that read and retries or reports an error. It must not treat a detected inconsistent read as successful.
+- If a file is moved, deleted, or inaccessible, its Object remains registered and searchable, and the file is marked unavailable.
+- Removing an Object removes its Elevia data but does not delete or modify the original file.
 
 ## OBJECT Rules (R1–R7)
 
+- `Object` is an abstract base. Currently, objects are created only by importing files. Each object has a unique ID and a required name used as a non-unique label; its file path is separate from its name.
 - **R1:** A registered Object has at least one TAGGING. If unassigned, it is assigned to the default `Untagged` Tag.
 - **R2:** Renaming an Object does not change its identity or associations.
 - **R3:** Updating `file_path` preserves the Object's identity. The operation is automatic and requires user confirmation.
@@ -56,26 +58,26 @@ are listed separately until they are implemented.
 ## ATTRIBUTE NAMESPACE Rules (R49–R52)
 
 - **R49:** Namespace names are unique and case insensitive.
-- **R50:** A namespace can exist without definitions as an empty template.
-- **R51:** Deleting a namespace deletes all its definitions and their values on Objects (CASCADE).
+- **R50:** A namespace can exist without definitions as an empty template. It is assigned to an Object as a whole, not as individual definitions; its attribute values default to NULL and may be supplied later.
+- **R51:** Deleting a namespace deletes its Object assignments, all its definitions, and their values on Objects (CASCADE).
 - **R52:** Renaming a namespace does not break values on Objects. The name is denormalized in `OBJECT_ATTRIBUTE.namespace`.
 
 ## ATTRIBUTE DEFINITION Rules (R53–R57)
 
-- **R53:** The pair `(namespace_id, key)` is unique: each key can appear at most once per namespace.
-- **R54:** The `ENUM` type requires `allowed_values` to be a non-empty JSON array.
-- **R55:** The `TEXT`, `NUMBER`, `DATE`, and `BOOLEAN` types do not use `allowed_values`; it must be NULL.
+- **R53:** Each key can appear at most once within a namespace, or once among definitions without a namespace.
+- **R54:** The `ENUM` type requires an explicit primitive value type (`TEXT`, `NUMBER`, `DATE`, or `BOOLEAN`) and a non-empty JSON array of allowed values. Every value must match the declared type; mixed types are not allowed. Dates use `YYYY-MM-DD` strings.
+- **R55:** The `TEXT`, `NUMBER`, `DATE`, and `BOOLEAN` types do not use an enum value type or `allowed_values`; both must be NULL.
 - **R56:** Deleting a definition deletes the values on Objects that use it (CASCADE).
 - **R57:** Changing a definition's type does not convert existing values; handling them is the user's responsibility.
 
 ## OBJECT_ATTRIBUTE Rules (R58–R65)
 
-- **R58:** Attributes can be **namespaced** (defined in a template) or **free** (without a namespace, with `definition_id = NULL` and `namespace = NULL`).
-- **R59:** For namespaced attributes, the definition must exist before assignment.
-- **R60:** For free attributes, the type is **automatically inferred** from the value on the first assignment.
+- **R58:** Attributes can be **namespaced** (grouped in a reusable template) or **free** (without a namespace). Both have a definition in the controlled vocabulary.
+- **R59:** Every attribute definition must exist before assignment, whether or not it belongs to a namespace. A namespace must exist before an attribute is defined within it and must be assigned to the Object as a whole before any of its values can be set.
+- **R60:** An attribute's type is specified in its definition, not inferred when a value is first assigned. Creating an Object or assigning a value does not create an attribute definition or namespace.
 - **R61:** An Object can have only one value per key, with or without a namespace: `UNIQUE (object_id, namespace, key)`.
-- **R62:** Values are validated against their type when assigned.
-- **R63:** For `ENUM` attributes, the value must be one of the defined `allowed_values`.
+- **R62:** An applicable attribute defaults to NULL when no value is assigned; NULL may also be assigned explicitly. Unsetting a value restores NULL. Non-NULL values are validated against their definition's type when assigned.
+- **R63:** For `ENUM` attributes, a non-NULL value must match the declared primitive value type and be one of the defined `allowed_values`. NULL is permitted independently of that list. A number and a string containing the same digits are distinct.
 - **R64:** Deleting an Object deletes all its attributes (CASCADE).
 - **R65:** Attributes are independent of Tags and Branches. They can be used in global queries or queries limited to a branch.
 
@@ -101,10 +103,10 @@ rules and executes the transaction only if all rules are satisfied
 - **R75:** No cycles are allowed between Tag identities. The global graph must be acyclic.
 - **R76:** A→B and B→A cannot coexist, even in separate contexts.
 - **R77:** Deleting a link does not delete other equivalent links. Automatically merging two branches with the same Tag is forbidden. Merging two Tags when the substitution would create a cycle is also forbidden. A merge always requires an explicit choice.
-- **R78:** Each confirmed plan is executed as a single transaction (all-or-nothing).
+- **R78:** Each executed plan, whether confirmed in Desktop or submitted through the CLI, is executed as a single transaction (all-or-nothing).
 - **R79:** If any rule (R1–R84) is violated or an error occurs, no part of the plan is applied.
-- **R80:** Structural changes require a preview showing their impact and conflicts.
+- **R80:** The Desktop interface provides a preview of structural changes, showing their impact and conflicts, before confirmation. CLI commands proceed without a preview or confirmation, subject to the same validation and transaction checks.
 - **R81:** A preview does not modify data and does not count as confirmation.
-- **R82:** Upon confirmation, the TransactionManager rechecks references, constraints (R1–R84), and the state used for the preview.
-- **R83:** If data has changed since the preview, confirmation is rejected.
+- **R82:** For a Desktop preview, upon confirmation the TransactionManager rechecks references, constraints (R1–R84), and the state used for the preview. CLI operations check references and constraints before execution.
+- **R83:** If data has changed since a Desktop preview, confirmation is rejected.
 - **R84:** Concurrent operations cannot bypass constraints (database lock). Conflicts cannot be resolved automatically without an explicit user choice.

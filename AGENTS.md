@@ -1,5 +1,7 @@
 # Rules
 
+- Read `README.md` first to understand the project and its starting point.
+- When creating a documentation file, add a link and a brief description to the Documentation section of `README.md`.
 - **Never read** the contents of the `_private/` directory.
 - Write identifiers (functions, variables, classes, types), comments, and docstrings in English.
 - Write code identifiers, comments, docstrings, documentation and commit
